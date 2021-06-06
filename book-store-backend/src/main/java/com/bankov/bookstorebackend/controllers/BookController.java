@@ -5,6 +5,7 @@ import com.bankov.bookstorebackend.exceptions.ResourceNotFoundException;
 import com.bankov.bookstorebackend.services.BookService;
 import com.bankov.bookstorebackend.models.Book;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -37,6 +38,7 @@ public class BookController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('create:books')")
     public ResponseEntity<Book> createBook(@Valid @RequestBody CreateBookForm book) {
             Book newBook = service.create(book);
             URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
@@ -45,11 +47,13 @@ public class BookController {
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasAuthority('update:books')")
     public ResponseEntity<Book> updateBook(@PathVariable("id") Long id, @Valid @RequestBody CreateBookForm newBook) {
         return ResponseEntity.of(service.update(id, newBook));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('delete:books')")
     public ResponseEntity<Book> deleteBook(@PathVariable("id") Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
