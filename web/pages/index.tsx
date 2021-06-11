@@ -1,17 +1,39 @@
-import { Image, Box, Heading, Text, Container, Fade } from "@chakra-ui/react";
+import {
+  Image,
+  Box,
+  Heading,
+  Text,
+  Container,
+  Fade,
+  Center,
+  useBreakpointValue,
+} from "@chakra-ui/react";
 import Link from "next/link";
+import React from "react";
+import LatestBooksCarousel from "../components/UI/HomePage/Carousel/LatestBooksCarousel";
 
 export default function Home() {
+  const slidesPerViewCount = useBreakpointValue({
+    base: 1,
+    sm: 2,
+    md: 3,
+    lg: 4,
+    xl: 5,
+    "2xl": 6,
+    "3xl": 7,
+  });
+
   return (
     <Box>
       <Fade in transition={{ enter: { duration: 1 } }}>
-        <Box w="100%" h="100vh">
+        {/* Cover Image Section (Hero) */}
+        <Box w="100%" h="95vh">
           <Container
             centerContent
             maxW="95%"
             position="absolute"
             left="50%"
-            top="30%"
+            top="30vh"
             transform="translate(-50%, -50%)"
           >
             <Heading
@@ -32,8 +54,11 @@ export default function Home() {
                 borderColor="brand.300"
                 textAlign="center"
                 padding="15"
-                transition="0.2s ease-out"
-                _hover={{ transform: "scale(1.1)", transition: "0.3s" }}
+                transition="0.25s ease-out"
+                _hover={{
+                  transform: "scale(1.1)",
+                  transition: "0.25s ease-out",
+                }}
               >
                 <Text h="100%">Shop now</Text>
               </Box>
@@ -45,9 +70,48 @@ export default function Home() {
             width="100%"
             height="100%"
             objectFit="cover"
-            borderBottomRadius="30%"
+            borderRadius="0 0 50% 50% / 100px"
           />
         </Box>
+
+        {/* Latest books section */}
+        <Box w="100%" my="10">
+          <Heading textAlign="center">Latest Books</Heading>
+
+          <LatestBooksCarousel
+            totalSlides={10}
+            slidesPerViewCount={slidesPerViewCount}
+          />
+
+          <Center my="-5" mb="10">
+            <Link href="/books">
+              <Box
+                as="button"
+                aria-label="view_more_button"
+                w={{ base: "60%", md: "35%", lg: "15%" }}
+                border="2px"
+                borderColor="brand.300"
+                textAlign="center"
+                padding="3"
+                transition="0.25s ease-out"
+                _hover={{
+                  transform: "scale(1.1)",
+                  transition: "0.25s ease-out",
+                }}
+              >
+                <Text h="100%">View more</Text>
+              </Box>
+            </Link>
+          </Center>
+        </Box>
+
+        {/* Authors sections */}
+        <Box
+          w="100%"
+          h="100vh"
+          bgColor="brand.200"
+          borderRadius="50% 50% 0 0 / 100px"
+        ></Box>
       </Fade>
     </Box>
   );

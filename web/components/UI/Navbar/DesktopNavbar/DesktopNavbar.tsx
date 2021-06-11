@@ -18,7 +18,14 @@ export interface IDesktopNavbarProps {
 
 export default function DesktopNavbar({ cartStatus }: IDesktopNavbarProps) {
   return (
-    <Flex zIndex="10" position="fixed" bg="brand.200" w="100%" h="70px">
+    <Flex
+      boxShadow="0 5px 5px rgba(0, 0, 0, 0.1)"
+      zIndex="10"
+      position="fixed"
+      bg="brand.100"
+      w="100%"
+      h="70px"
+    >
       <SimpleGrid
         px={{ base: "10px", lg: "40px" }}
         mx="auto"
