@@ -4,11 +4,8 @@ import com.bankov.bookstorebackend.DTOs.CreateBookForm;
 import com.bankov.bookstorebackend.exceptions.ResourceNotFoundException;
 import com.bankov.bookstorebackend.services.BookService;
 import com.bankov.bookstorebackend.models.Book;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -26,8 +23,18 @@ public class BookController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Book>> findAllBooks() {
-        List<Book> books = service.findAll();
+    public ResponseEntity<Page<Book>> findBooksPaginated(@RequestParam(required = false, defaultValue = "0") int page,
+                                                            @RequestParam(required = false, defaultValue = "10") int size,
+                                                            @RequestParam(required = false, defaultValue = "id") String sortBy,
+                                                            @RequestParam(required = false, defaultValue = "false") boolean asc) {
+
+        Page<Book> books;
+        if (sortBy.equals("title") || sortBy.equals("price") || sortBy.equals("yearOfRelease")) {
+            books = service.findPaginated(page, size, sortBy, asc);
+
+        } else {
+            books = service.findPaginated(page, size, "id", asc);
+        }
         return ResponseEntity.ok().body(books);
     }
 
@@ -38,22 +45,22 @@ public class BookController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('create:books')")
+    //@PreAuthorize("hasAuthority('create:books')")
     public ResponseEntity<Book> createBook(@Valid @RequestBody CreateBookForm book) {
-            Book newBook = service.create(book);
-            URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-                    .buildAndExpand(newBook.getId()).toUri();
-            return ResponseEntity.created(location).body(newBook);
+        Book newBook = service.create(book);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                .buildAndExpand(newBook.getId()).toUri();
+        return ResponseEntity.created(location).body(newBook);
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasAuthority('update:books')")
+    //@PreAuthorize("hasAuthority('update:books')")
     public ResponseEntity<Book> updateBook(@PathVariable("id") Long id, @Valid @RequestBody CreateBookForm newBook) {
         return ResponseEntity.of(service.update(id, newBook));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('delete:books')")
+    //@PreAuthorize("hasAuthority('delete:books')")
     public ResponseEntity<Book> deleteBook(@PathVariable("id") Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();

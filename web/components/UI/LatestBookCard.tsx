@@ -28,9 +28,17 @@ export default function LatestBookCard({
   price,
 }: ILatestBookCardProps) {
   return (
-    <Box py="5px">
+    <Box
+      py="5px"
+      transition="0.2s ease"
+      _hover={{
+        transform: "scale(1.05)",
+        transition: "0.2s ease",
+        cursor: "pointer",
+      }}
+    >
       <Flex
-        boxShadow="0 0 10px rgba(0, 0, 0, 0.25)"
+        boxShadow="0 10px 10px rgba(0, 0, 0, 0.25)"
         borderRadius="5px"
         flexDir="column"
         maxW="90%"
@@ -38,11 +46,11 @@ export default function LatestBookCard({
         mx="auto"
         h="100%"
       >
-        <AspectRatio m="10px auto" w="75%" ratio={0.68 / 1}>
+        <AspectRatio m="10px auto" w="75%" ratio={0.68}>
           <Image src={imgSrc} objectFit="cover" />
         </AspectRatio>
         <Stack direction="column" spacing={2.5} mx="auto" w="100%" flex={1}>
-          <Center flexDir="column" textAlign="center">
+          <Center mx="3" flexDir="column" textAlign="center">
             <Text
               noOfLines={2}
               fontWeight="bold"

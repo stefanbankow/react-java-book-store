@@ -1,6 +1,7 @@
 package com.bankov.bookstorebackend.models;
 
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.URL;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -8,20 +9,26 @@ import javax.validation.constraints.NotNull;
 @Entity
 public class Author {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NotNull(message = "Author must have a name")
     @Length(min = 1, message = "Author's name must not be empty")
     private String name;
     private String description;
-    private Long yearBorn;
-    private Long yearOfDeath;
+
+
+    @URL(message = "You must provide a valid link to an image")
+    private String imageURL;
+
+    private Integer yearBorn;
+    private Integer yearOfDeath;
 
     protected Author() {}
 
-    public Author(String name, String description, Long yearBorn, Long yearOfDeath) {
+    public Author(String name, String description, String imageURL, Integer yearBorn, Integer yearOfDeath) {
         this.name = name;
         this.description = description;
+        this.imageURL = imageURL;
         this.yearBorn = yearBorn;
         this.yearOfDeath = yearOfDeath;
     }
@@ -38,11 +45,15 @@ public class Author {
         return description;
     }
 
-    public Long getYearBorn() {
+    public String getImageURL() {
+        return imageURL;
+    }
+
+    public Integer getYearBorn() {
         return yearBorn;
     }
 
-    public Long getYearOfDeath() {
+    public Integer getYearOfDeath() {
         return yearOfDeath;
     }
 
@@ -62,6 +73,7 @@ public class Author {
     public void updateWith(Author author) {
         this.name = author.name;
         this.description = author.description;
+        this.imageURL = author.imageURL;
         this.yearBorn = author.yearBorn;
         this.yearOfDeath = author.yearOfDeath;
     }

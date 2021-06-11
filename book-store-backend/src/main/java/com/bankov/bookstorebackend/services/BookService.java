@@ -5,6 +5,10 @@ import com.bankov.bookstorebackend.DTOs.CreateBookForm;
 import com.bankov.bookstorebackend.exceptions.ResourceNotFoundException;
 import com.bankov.bookstorebackend.models.Author;
 import com.bankov.bookstorebackend.models.Book;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Service;
 
@@ -22,11 +26,14 @@ public class BookService {
         this.authorRepository = authorRepository;
     }
 
-    public List<Book> findAll() {
-        List<Book> bookList = new ArrayList<>();
-        Iterable<Book> books = bookRepository.findAll();
-        books.forEach(bookList::add);
-        return bookList;
+    public Page<Book> findPaginated(int page, int size, String sortBy, boolean ascending) {
+        if(ascending) {
+            return bookRepository.findAll(PageRequest.of(page, size, Sort.by(sortBy).ascending()));
+        }
+        else {
+            return bookRepository.findAll(PageRequest.of(page, size, Sort.by(sortBy).descending()));
+        }
+
     }
 
     public Optional<Book> findById(Long id) {

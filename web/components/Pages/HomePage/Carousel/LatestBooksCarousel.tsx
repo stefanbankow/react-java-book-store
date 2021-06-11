@@ -9,7 +9,7 @@ import {
 } from "pure-react-carousel";
 import "pure-react-carousel/dist/react-carousel.es.css";
 import { Box, Flex, Icon } from "@chakra-ui/react";
-import BookCard from "./LatestBookCard";
+import BookCard from "../../../UI/LatestBookCard";
 
 export interface ILatestBooksCarouselProps {
   slidesPerViewCount: number | undefined;

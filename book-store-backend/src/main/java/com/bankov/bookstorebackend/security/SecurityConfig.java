@@ -30,11 +30,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .mvcMatchers(HttpMethod.GET, "api/store/books").permitAll()
+                /*.mvcMatchers(HttpMethod.GET, "api/store/books/").permitAll()
                 .mvcMatchers(HttpMethod.GET, "api/store/books/*").permitAll()
-                .mvcMatchers(HttpMethod.GET, "api/store/authors").permitAll()
-                .mvcMatchers(HttpMethod.GET, "api/store/authors/*").permitAll()
-                .anyRequest().authenticated()
+                .mvcMatchers(HttpMethod.GET, "api/store/authors/").permitAll()
+                .mvcMatchers(HttpMethod.GET, "api/store/authors/*").permitAll() */
+                .anyRequest().permitAll()
                 .and()
                 .cors().configurationSource(corsConfigurationSource())
                 .and()

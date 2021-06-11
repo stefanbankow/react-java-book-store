@@ -5,13 +5,18 @@ import javax.persistence.*;
 @Entity
 public class Book {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
     private String description;
     private Long price;
+    private String coverArtURL;
+
+
     private Long yearOfRelease;
     private Boolean forSale;
+
+
     @ManyToOne
     @JoinColumn(name = "author_id")
     private Author author;
@@ -19,12 +24,13 @@ public class Book {
     protected Book() {
     }
 
-    public Book(String title, String description, Long price, Long yearOfRelease, Boolean forSale) {
+    public Book(String title, String description, Long price, Long yearOfRelease, Boolean forSale, String coverArtURL) {
         this.title = title;
         this.description = description;
         this.price = price;
         this.yearOfRelease = yearOfRelease;
         this.forSale = forSale;
+        this.coverArtURL = coverArtURL;
     }
 
     public Long getId() {
@@ -42,7 +48,9 @@ public class Book {
     public Long getPrice() {
         return price;
     }
-
+    public String getCoverArtURL() {
+        return coverArtURL;
+    }
     public Long getYearOfRelease() {
         return yearOfRelease;
     }
@@ -54,6 +62,7 @@ public class Book {
     public Author getAuthor() {
         return author;
     }
+
 
     public void setAuthor(Author author) {
         this.author = author;

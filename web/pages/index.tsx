@@ -14,8 +14,10 @@ import { Waypoint } from "react-waypoint";
 import Link from "next/link";
 import React from "react";
 
-import LatestBooksCarousel from "../components/UI/HomePage/Carousel/LatestBooksCarousel";
+import LatestBooksCarousel from "../components/Pages/HomePage/Carousel/LatestBooksCarousel";
 
+//Note: I would have loved to split each section in it's own separate component, but doing so messes up the link styling.
+//I decided that trying to fix it would be more trouble than it's worth and so this file is longger than it could be
 export default function Home() {
   const slidesPerViewCount = useBreakpointValue({
     base: 1,
