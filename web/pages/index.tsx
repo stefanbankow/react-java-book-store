@@ -7,9 +7,13 @@ import {
   Fade,
   Center,
   useBreakpointValue,
+  SlideFade,
+  useDisclosure,
 } from "@chakra-ui/react";
+import { Waypoint } from "react-waypoint";
 import Link from "next/link";
 import React from "react";
+
 import LatestBooksCarousel from "../components/UI/HomePage/Carousel/LatestBooksCarousel";
 
 export default function Home() {
@@ -22,6 +26,8 @@ export default function Home() {
     "2xl": 6,
     "3xl": 7,
   });
+
+  const { onOpen, isOpen } = useDisclosure();
 
   return (
     <Box>
@@ -75,34 +81,43 @@ export default function Home() {
         </Box>
 
         {/* Latest books section */}
+
         <Box w="100%" my="10">
           <Heading textAlign="center">Latest Books</Heading>
-
-          <LatestBooksCarousel
-            totalSlides={10}
-            slidesPerViewCount={slidesPerViewCount}
-          />
-
-          <Center my="-5" mb="10">
-            <Link href="/books">
-              <Box
-                as="button"
-                aria-label="view_more_button"
-                w={{ base: "60%", md: "35%", lg: "15%" }}
-                border="2px"
-                borderColor="brand.300"
-                textAlign="center"
-                padding="3"
-                transition="0.25s ease-out"
-                _hover={{
-                  transform: "scale(1.1)",
-                  transition: "0.25s ease-out",
-                }}
-              >
-                <Text h="100%">View more</Text>
+          <SlideFade
+            offsetY="100px"
+            transition={{ enter: { duration: 0.5 } }}
+            in={isOpen}
+          >
+            <Waypoint onEnter={onOpen}>
+              <Box>
+                <LatestBooksCarousel
+                  totalSlides={10}
+                  slidesPerViewCount={slidesPerViewCount}
+                />
               </Box>
-            </Link>
-          </Center>
+            </Waypoint>
+            <Center my="-5" mb="10">
+              <Link href="/books">
+                <Box
+                  as="button"
+                  aria-label="view_more_button"
+                  w={{ base: "60%", md: "35%", lg: "15%" }}
+                  border="2px"
+                  borderColor="brand.300"
+                  textAlign="center"
+                  padding="3"
+                  transition="0.25s ease-out"
+                  _hover={{
+                    transform: "scale(1.1)",
+                    transition: "0.25s ease-out",
+                  }}
+                >
+                  <Text h="100%">View more</Text>
+                </Box>
+              </Link>
+            </Center>
+          </SlideFade>
         </Box>
 
         {/* Authors sections */}

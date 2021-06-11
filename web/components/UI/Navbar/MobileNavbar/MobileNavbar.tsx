@@ -11,7 +11,6 @@ import * as React from "react";
 import HomePageLink from "../HomePageLink";
 import MobileCart from "../MobileNavbar/MobileCartButton";
 import MobileButtonWrapper from "../../Buttons/MobileButtonWrapper";
-import MenuDrawer from "../../Drawers/MenuDrawer";
 
 export interface IMobileNavbarProps {
   menuStatus: UseDisclosureProps;

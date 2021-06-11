@@ -22,7 +22,6 @@ export interface ILatestBookCardProps {
 }
 
 export default function LatestBookCard({
-  id,
   imgSrc,
   title,
   authorName,
