@@ -9,11 +9,10 @@ public class Book {
     private Long id;
     private String title;
     private String description;
-    private Long price;
     private String coverArtURL;
 
-
-    private Long yearOfRelease;
+    private Integer price;
+    private Integer yearOfRelease;
     private Boolean forSale;
 
 
@@ -24,7 +23,7 @@ public class Book {
     protected Book() {
     }
 
-    public Book(String title, String description, Long price, Long yearOfRelease, Boolean forSale, String coverArtURL) {
+    public Book(String title, String description,String coverArtURL, Integer price, Integer yearOfRelease, Boolean forSale ) {
         this.title = title;
         this.description = description;
         this.price = price;
@@ -45,13 +44,15 @@ public class Book {
         return description;
     }
 
-    public Long getPrice() {
+    public Integer getPrice() {
         return price;
     }
+
     public String getCoverArtURL() {
         return coverArtURL;
     }
-    public Long getYearOfRelease() {
+
+    public Integer getYearOfRelease() {
         return yearOfRelease;
     }
 
@@ -79,23 +80,16 @@ public class Book {
                 '}';
     }
 
-    public void partialUpdateWith(Book book) {
-        if(book.title != null) {
-            this.title = book.title;
-        }
-        if(book.description != null) {
-            this.description = book.description;
-        }
+    public void updateWith(Book book) {
 
-        if(book.price != null) {
-            this.price = book.price;
-        }
+        this.title = book.title;
+        this.description = book.description;
+        this.coverArtURL = book.coverArtURL;
 
-        if(book.yearOfRelease != null) {
-            this.yearOfRelease = book.yearOfRelease;
-        }
-        if(book.forSale != null) {
-            this.forSale = book.forSale;
-        }
+        this.price = book.price;
+        this.yearOfRelease = book.yearOfRelease;
+
+        this.forSale = book.forSale;
+
     }
 }

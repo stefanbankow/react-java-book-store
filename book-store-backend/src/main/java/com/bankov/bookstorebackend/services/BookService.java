@@ -54,7 +54,7 @@ public class BookService {
 
     public Optional<Book> update(Long id, CreateBookForm newBook) {
         return bookRepository.findById(id).map(book -> {
-            book.partialUpdateWith(newBook.toBook());
+            book.updateWith(newBook.toBook());
             return bookRepository.save(book);
         });
     }

@@ -8,22 +8,18 @@ import javax.validation.constraints.NotNull;
 public class CreateBookForm {
     @NotNull(message = "Book must have a title")
     private final String title;
-
     private final String description;
-
-    @NotNull(message = "Book must have a price")
-    private final Long price;
-
     @URL(message = "You must provide a valid url to an image")
     private final String coverArtURL;
 
-    private final Long yearOfRelease;
-
+    @NotNull(message = "Book must have a price")
+    private final Integer price;
+    private final Integer yearOfRelease;
     private final boolean forSale;
 
     private final Long authorId;
 
-    public CreateBookForm(String title, String description, Long price, String coverArtURL, Long yearOfRelease, boolean forSale, Long authorId) {
+    public CreateBookForm(String title, String description,String coverArtURL, Integer price, Integer yearOfRelease, boolean forSale, Long authorId) {
         this.title = title;
         this.description = description;
         this.price = price;
@@ -41,11 +37,15 @@ public class CreateBookForm {
         return description;
     }
 
-    public Long getPrice() {
+    public String getCoverArtURL() {
+        return coverArtURL;
+    }
+
+    public Integer getPrice() {
         return price;
     }
 
-    public Long getYearOfRelease() {
+    public Integer getYearOfRelease() {
         return yearOfRelease;
     }
 
@@ -58,6 +58,6 @@ public class CreateBookForm {
     }
 
     public Book toBook() {
-        return new Book(this.title, this.description, this.price, this.yearOfRelease, this.forSale, this.coverArtURL);
+        return new Book(this.title, this.description, this.coverArtURL, this.price, this.yearOfRelease, this.forSale);
     }
 }

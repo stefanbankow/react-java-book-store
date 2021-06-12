@@ -57,7 +57,7 @@ export default function BooksPage({
                   id={book.id}
                   imgSrc={book.coverArtURL}
                   title={book.title}
-                  authorName={book.author.name}
+                  authorName={book.author?.name}
                   price={book.price}
                 />
               );

@@ -6,6 +6,7 @@ import com.bankov.bookstorebackend.services.BookService;
 import com.bankov.bookstorebackend.models.Book;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -45,7 +46,7 @@ public class BookController {
     }
 
     @PostMapping
-    //@PreAuthorize("hasAuthority('create:books')")
+    @PreAuthorize("hasAuthority('create:books')")
     public ResponseEntity<Book> createBook(@Valid @RequestBody CreateBookForm book) {
         Book newBook = service.create(book);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
@@ -54,13 +55,13 @@ public class BookController {
     }
 
     @PatchMapping("/{id}")
-    //@PreAuthorize("hasAuthority('update:books')")
+    @PreAuthorize("hasAuthority('update:books')")
     public ResponseEntity<Book> updateBook(@PathVariable("id") Long id, @Valid @RequestBody CreateBookForm newBook) {
         return ResponseEntity.of(service.update(id, newBook));
     }
 
     @DeleteMapping("/{id}")
-    //@PreAuthorize("hasAuthority('delete:books')")
+    @PreAuthorize("hasAuthority('delete:books')")
     public ResponseEntity<Book> deleteBook(@PathVariable("id") Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();

@@ -44,7 +44,7 @@ public class AuthorController {
     }
 
     @PostMapping
-    //@PreAuthorize("hasAuthority('create:authors')")
+    @PreAuthorize("hasAuthority('create:authors')")
     public ResponseEntity<Author> createAuthor(@Valid @RequestBody Author newAuthor) {
         Author author = service.create(newAuthor);
 
@@ -56,13 +56,13 @@ public class AuthorController {
 
 
     @PatchMapping("/{id}")
-    //@PreAuthorize("hasAuthority('update:authors')")
+    @PreAuthorize("hasAuthority('update:authors')")
     public ResponseEntity<Author> updateAuthor(@PathVariable("id") Long id, @Valid @RequestBody Author updatedAuthor) {
         return ResponseEntity.of(service.update(id, updatedAuthor));
     }
 
     @DeleteMapping("/{id}")
-    //@PreAuthorize("hasAuthority('delete:authors')")
+    @PreAuthorize("hasAuthority('delete:authors')")
     public ResponseEntity<Author> deleteAuthor(@PathVariable("id") Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
