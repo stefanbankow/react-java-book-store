@@ -24,10 +24,10 @@ public class BookController {
 
     @GetMapping
     public ResponseEntity<Page<Book>> findBooksPaginated(@RequestParam(required = false, defaultValue = "0") int page,
-                                                            @RequestParam(required = false, defaultValue = "10") int size,
-                                                            @RequestParam(required = false, defaultValue = "id") String sortBy,
-                                                            @RequestParam(required = false, defaultValue = "false") boolean asc) {
-
+                                                         @RequestParam(required = false, defaultValue = "10") int size,
+                                                         @RequestParam(required = false, defaultValue = "id") String sortBy,
+                                                         @RequestParam(required = false, defaultValue = "false") boolean asc) {
+        
         Page<Book> books;
         if (sortBy.equals("title") || sortBy.equals("price") || sortBy.equals("yearOfRelease")) {
             books = service.findPaginated(page, size, sortBy, asc);

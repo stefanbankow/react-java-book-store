@@ -11,12 +11,14 @@ import HomePageLink from "../HomePageLink";
 import NavbarLink from "./NavbarLink";
 import MyDivider from "../../Divider";
 import styles from "../../../../styles/AnimatedUnderlineLink.module.css";
+import { useUser } from "@auth0/nextjs-auth0";
 
 export interface IDesktopNavbarProps {
   cartStatus: UseDisclosureProps;
 }
 
 export default function DesktopNavbar({ cartStatus }: IDesktopNavbarProps) {
+  const { isLoading, user } = useUser();
   return (
     <Flex
       boxShadow="0 5px 5px rgba(0, 0, 0, 0.1)"
@@ -44,9 +46,15 @@ export default function DesktopNavbar({ cartStatus }: IDesktopNavbarProps) {
         </Box>
 
         <HStack justifyContent="right" spacing={{ base: "1rem", lg: "2rem" }}>
-          <NavbarLink link="/signin">Sign in</NavbarLink>
-
-          <NavbarLink link="/signup">Sign up</NavbarLink>
+          {isLoading ? (
+            <div />
+          ) : user ? (
+            <NavbarLink link="/api/auth/logout">{user.name!}</NavbarLink>
+          ) : (
+            <>
+              <NavbarLink link="/api/auth/login">Sign in / Sign up</NavbarLink>
+            </>
+          )}
           <MyDivider width="1px" orientation="vertical" />
           <Box as="button" aria-label="desktop_cart_button">
             <a onClick={cartStatus.onOpen} className={styles.navbarLink}>

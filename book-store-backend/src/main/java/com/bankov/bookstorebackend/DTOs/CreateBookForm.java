@@ -9,7 +9,6 @@ public class CreateBookForm {
     @NotNull(message = "Book must have a title")
     private final String title;
 
-    @NotNull(message = "Book must have a description")
     private final String description;
 
     @NotNull(message = "Book must have a price")
@@ -17,8 +16,11 @@ public class CreateBookForm {
 
     @URL(message = "You must provide a valid url to an image")
     private final String coverArtURL;
+
     private final Long yearOfRelease;
+
     private final boolean forSale;
+
     private final Long authorId;
 
     public CreateBookForm(String title, String description, Long price, String coverArtURL, Long yearOfRelease, boolean forSale, Long authorId) {

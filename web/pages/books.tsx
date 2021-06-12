@@ -7,12 +7,23 @@ import {
   Text,
   useBreakpointValue,
 } from "@chakra-ui/react";
-import * as React from "react";
-import BookCard from "../components/UI/LatestBookCard";
+import BookCard from "../components/UI/BookCard";
+import { BookProps, PaginatedBooksResponseProps } from "../types/BookTypes";
+
+import React from "react";
+import { InferGetServerSidePropsType } from "next";
 
 export interface IBooksPageProps {}
 
-export default function BooksPage(props: IBooksPageProps) {
+export async function getServerSideProps() {
+  const res = await fetch(`http://localhost:3000/api/store/books`);
+  const data: PaginatedBooksResponseProps = await res.json();
+  return { props: { data } };
+}
+
+export default function BooksPage({
+  data,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const slidesPerViewCount = useBreakpointValue({
     base: 1,
     sm: 2,
@@ -22,6 +33,7 @@ export default function BooksPage(props: IBooksPageProps) {
     "2xl": 6,
     "3xl": 7,
   });
+
   return (
     <Box mx={{ base: "5", md: "10" }}>
       <Box h="70px" />
@@ -36,37 +48,20 @@ export default function BooksPage(props: IBooksPageProps) {
             find a book you'll fall in love with.
           </Text>
         </Container>
-        <SimpleGrid spacing={3} columns={slidesPerViewCount}>
-          <BookCard
-            imgSrc="/book_covers/book_cover_1.jpg"
-            title=" A Middle-earth Traveller: Sketches from Bag End to Mordor"
-            authorName="J.R.R. Tolkien"
-            price={599}
-          />
-          <BookCard
-            imgSrc="/book_covers/book_cover_1.jpg"
-            title=" A Middle-earth Traveller: Sketches from Bag End to Mordor"
-            authorName="J.R.R. Tolkien"
-            price={599}
-          />
-          <BookCard
-            imgSrc="/book_covers/book_cover_1.jpg"
-            title=" A Middle-earth Traveller: Sketches from Bag End to Mordor"
-            authorName="J.R.R. Tolkien"
-            price={599}
-          />
-          <BookCard
-            imgSrc="/book_covers/book_cover_1.jpg"
-            title=" A Middle-earth Traveller: Sketches from Bag End to Mordor"
-            authorName="J.R.R. Tolkien"
-            price={599}
-          />
-          <BookCard
-            imgSrc="/book_covers/book_cover_1.jpg"
-            title=" A Middle-earth Traveller: Sketches from Bag End to Mordor"
-            authorName="J.R.R. Tolkien"
-            price={599}
-          />
+        <SimpleGrid my="5" spacing={3} columns={slidesPerViewCount}>
+          {data.content &&
+            data.content.map((book: BookProps) => {
+              return (
+                <BookCard
+                  key={book.id}
+                  id={book.id}
+                  imgSrc={book.coverArtURL}
+                  title={book.title}
+                  authorName={book.author.name}
+                  price={book.price}
+                />
+              );
+            })}
         </SimpleGrid>
       </Fade>
     </Box>

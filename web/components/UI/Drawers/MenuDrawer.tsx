@@ -12,6 +12,7 @@ import {
   DrawerBody,
 } from "@chakra-ui/react";
 import NavbarLink from "../Navbar/DesktopNavbar/NavbarLink";
+import { useUser } from "@auth0/nextjs-auth0";
 
 export interface IMenuDrawerProps {
   isOpen: boolean;
@@ -24,6 +25,8 @@ export default function MenuDrawer({
   onClose,
   placement,
 }: IMenuDrawerProps) {
+  const { isLoading, user } = useUser();
+
   return (
     <Drawer isOpen={isOpen} onClose={onClose} placement={placement}>
       <DrawerOverlay />
@@ -52,8 +55,17 @@ export default function MenuDrawer({
             <Spacer />
             <Divider orientation="horizontal" />
             <Spacer />
-            <NavbarLink link="/about">Sign in</NavbarLink>
-            <NavbarLink link="/about">Sign up</NavbarLink>
+            {isLoading ? null : user ? (
+              <NavbarLink link="/api/auth/logout" onClick={onClose}>
+                {user.name!}
+              </NavbarLink>
+            ) : (
+              <>
+                <NavbarLink link="/api/auth/login" onClick={onClose}>
+                  Sign in / Sign up
+                </NavbarLink>
+              </>
+            )}
           </VStack>
         </DrawerBody>
       </DrawerContent>

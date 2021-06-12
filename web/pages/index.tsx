@@ -9,16 +9,27 @@ import {
   useBreakpointValue,
   SlideFade,
   useDisclosure,
+  Spinner,
 } from "@chakra-ui/react";
 import { Waypoint } from "react-waypoint";
 import Link from "next/link";
 import React from "react";
 
 import LatestBooksCarousel from "../components/Pages/HomePage/Carousel/LatestBooksCarousel";
+import { PaginatedBooksResponseProps } from "../types/BookTypes";
+import { InferGetServerSidePropsType } from "next";
+
+export async function getServerSideProps() {
+  const res = await fetch(`http://localhost:3000/api/store/books`);
+  const data: PaginatedBooksResponseProps = await res.json();
+  return { props: { data } };
+}
 
 //Note: I would have loved to split each section in it's own separate component, but doing so messes up the link styling.
 //I decided that trying to fix it would be more trouble than it's worth and so this file is longger than it could be
-export default function Home() {
+export default function Home({
+  data,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const slidesPerViewCount = useBreakpointValue({
     base: 1,
     sm: 2,
@@ -93,10 +104,15 @@ export default function Home() {
           >
             <Waypoint onEnter={onOpen}>
               <Box>
-                <LatestBooksCarousel
-                  totalSlides={10}
-                  slidesPerViewCount={slidesPerViewCount}
-                />
+                {data && (
+                  <LatestBooksCarousel
+                    books={data.content}
+                    totalSlides={
+                      data.content.length < 10 ? data.content.length : 10
+                    }
+                    slidesPerViewCount={slidesPerViewCount}
+                  />
+                )}
               </Box>
             </Waypoint>
             <Center my="-5" mb="10">
