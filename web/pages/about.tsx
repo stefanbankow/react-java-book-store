@@ -3,11 +3,9 @@ import * as React from "react";
 
 export interface IAboutProps {}
 
-export default function About(props: IAboutProps) {
+export default function About() {
   return (
-    <Box mx={{ base: "5", md: "10" }}>
-      <Box h="70px" />
-
+    <Box mx={{ base: "5", md: "10" }} mb="10">
       <Fade in transition={{ enter: { duration: 1 } }}>
         <Container maxW="100%">
           <Heading textAlign={{ base: "center", md: "left" }} my="10">

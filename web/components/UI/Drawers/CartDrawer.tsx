@@ -1,19 +1,21 @@
-import * as React from "react";
+import React from "react";
 import {
   Drawer,
   DrawerCloseButton,
   DrawerContent,
   DrawerHeader,
   DrawerOverlay,
-  SlideOptions,
   Spacer,
   VStack,
   DrawerBody,
   DrawerFooter,
-  Button,
   HStack,
+  Text,
+  Button,
 } from "@chakra-ui/react";
 import NavbarLink from "../Navbar/DesktopNavbar/NavbarLink";
+import styles from "../../../styles/AnimatedUnderlineLink.module.css";
+import Link from "next/link";
 
 export interface ICartDrawerProps {
   isOpen: boolean;
@@ -30,7 +32,7 @@ export default function CartDrawer({ isOpen, onClose }: ICartDrawerProps) {
           borderBottomWidth="1px"
           borderColor="brand.300"
           textAlign="center"
-          color="brand.300"
+          textColor="brand.300"
         >
           Cart
         </DrawerHeader>
@@ -44,11 +46,25 @@ export default function CartDrawer({ isOpen, onClose }: ICartDrawerProps) {
           borderTop="1px"
           borderColor="brand.300"
         >
-          <HStack align="center">
-            <NavbarLink link="/order">Order</NavbarLink>
+          <HStack spacing={20} align="center">
+            <Link href="/order">
+              <Button
+                textColor="brand.300"
+                fontSize={"xl"}
+                onClick={onClose}
+                variant="ghost"
+              >
+                Order
+              </Button>
+            </Link>
 
-            <Button mx="10" variant="outline" mr={3} onClick={onClose}>
-              Cancel
+            <Button
+              textColor="brand.300"
+              fontSize={"xl"}
+              onClick={onClose}
+              variant="ghost"
+            >
+              Close
             </Button>
           </HStack>
         </DrawerFooter>

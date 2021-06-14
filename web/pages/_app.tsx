@@ -4,12 +4,17 @@ import { ChakraProvider } from "@chakra-ui/react";
 import type { AppProps } from "next/app";
 import PageLayout from "../components/Layout/PageLayout";
 import { UserProvider } from "@auth0/nextjs-auth0";
+import Head from "next/head";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <UserProvider>
       <ChakraProvider theme={theme}>
         <PageLayout>
+          <Head>
+            <title>Book store</title>
+            <meta property="og:index_title" content="Book store" key="title" />
+          </Head>
           <Component {...pageProps} />
         </PageLayout>
       </ChakraProvider>

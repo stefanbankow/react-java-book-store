@@ -5,12 +5,13 @@ export default async function getBooks(
   res: NextApiResponse
 ) {
   try {
-    const response = await fetch("http://localhost:8080/api/store/books");
-    const products = await response.json();
-    res.status(200).json(products);
+    const response = await fetch(
+      `http://localhost:8080/api/store/books?page=${req.query.page}&size=${req.query.size}&sortBy=${req.query.sortBy}&asc=${req.query.asc}`
+    );
+    const books = await response.json();
+    res.status(200).json(books);
   } catch (error) {
-    console.log("Error called");
     console.error(error.message);
-    res.status(400).json(error);
+    res.status(500).json({ error });
   }
 }

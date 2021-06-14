@@ -1,7 +1,6 @@
-import { useMediaQuery } from "@chakra-ui/react";
+import { Box, Flex } from "@chakra-ui/react";
 import * as React from "react";
-import MobileNavbar from "../UI/Navbar/MobileNavbar/MobileNavbar";
-import DesktopNavbar from "../UI/Navbar/DesktopNavbar/DesktopNavbar";
+import Footer from "../UI/Footer/Footer";
 import Navbar from "../UI/Navbar/NavbarWrapper";
 
 export interface IPageLayoutProps {
@@ -9,12 +8,13 @@ export interface IPageLayoutProps {
 }
 
 export default function PageLayout({ children }: IPageLayoutProps) {
-  const [smallScreen] = useMediaQuery("(max-width: 800px)");
-
   return (
-    <div>
+    <Flex h="100vh" flexDir="column">
       <Navbar />
-      {children}
-    </div>
+      <Box mt="70px">{children}</Box>
+
+      <Box position="absolute" bottom="0" w="100%" mt="auto" />
+      <Footer />
+    </Flex>
   );
 }

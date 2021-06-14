@@ -12,5 +12,11 @@ export interface BookProps {
 }
 
 export interface PaginatedBooksResponseProps {
-  content: BookProps[];
+  content?: BookProps[];
+  error?: {
+    code: string;
+    errno: string;
+    message: string;
+    type: string;
+  };
 }

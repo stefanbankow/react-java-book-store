@@ -1,34 +1,47 @@
+//React libs
+import React from "react";
+import { Waypoint } from "react-waypoint";
+import { FaBook, FaPen, FaStoreAlt, FaUser } from "react-icons/fa";
 import {
-  Image,
   Box,
-  Heading,
-  Text,
+  Center,
   Container,
   Fade,
-  Center,
-  useBreakpointValue,
+  Flex,
+  Heading,
+  HStack,
+  Icon,
+  Image,
   SlideFade,
+  Text,
+  useBreakpointValue,
   useDisclosure,
-  Spinner,
 } from "@chakra-ui/react";
-import { Waypoint } from "react-waypoint";
-import Link from "next/link";
-import React from "react";
 
-import LatestBooksCarousel from "../components/Pages/HomePage/Carousel/LatestBooksCarousel";
-import { PaginatedBooksResponseProps } from "../types/BookTypes";
+//Next.js
 import { InferGetServerSidePropsType } from "next";
+import Link from "next/link";
+
+//Components
+import LatestBooksCarousel from "../components/Pages/HomePage/Carousel/LatestBooksCarousel";
+import ErrorMessage from "../components/UI/ErrorMessage";
+
+//PropTypes
+import { PaginatedBooksResponseProps } from "../types/BookTypes";
 
 export async function getServerSideProps() {
-  const res = await fetch(`http://localhost:3000/api/store/books`);
-  const data: PaginatedBooksResponseProps = await res.json();
-  return { props: { data } };
+  const res = await fetch(
+    `http://localhost:3000/api/store/books?page=0&size=10&sortBy=id&asc=false`
+  );
+  const books: PaginatedBooksResponseProps = await res.json();
+  return { props: { books, status: res.status } };
 }
 
 //Note: I would have loved to split each section in it's own separate component, but doing so messes up the link styling.
 //I decided that trying to fix it would be more trouble than it's worth and so this file is longger than it could be
 export default function Home({
-  data,
+  books,
+  status,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const slidesPerViewCount = useBreakpointValue({
     base: 1,
@@ -40,7 +53,9 @@ export default function Home({
     "3xl": 7,
   });
 
-  const { onOpen, isOpen } = useDisclosure();
+  const latestBooksState = useDisclosure();
+  const authorsSectionState = useDisclosure();
+  const aboutSectionState = useDisclosure();
 
   return (
     <Box>
@@ -52,13 +67,13 @@ export default function Home({
             maxW="95%"
             position="absolute"
             left="50%"
-            top="30vh"
+            top="40vh"
             transform="translate(-50%, -50%)"
           >
             <Heading
               color="brand.300"
               fontWeight="semibold"
-              fontSize={{ base: "2xl", lg: "6xl" }}
+              fontSize={{ base: "2xl", md: "4xl", lg: "6xl" }}
               textAlign="center"
               marginY="20"
             >
@@ -98,20 +113,35 @@ export default function Home({
         <Box w="100%" my="10">
           <Heading textAlign="center">Latest Books</Heading>
           <SlideFade
-            offsetY="100px"
+            offsetY="50px"
             transition={{ enter: { duration: 0.5 } }}
-            in={isOpen}
+            in={latestBooksState.isOpen}
           >
-            <Waypoint onEnter={onOpen}>
+            <Waypoint onEnter={latestBooksState.onOpen}>
               <Box>
-                {data && (
+                {books.content ? (
                   <LatestBooksCarousel
-                    books={data.content}
+                    books={books.content}
                     totalSlides={
-                      data.content.length < 10 ? data.content.length : 10
+                      books.content.length < 10 ? books.content.length : 10
                     }
                     slidesPerViewCount={slidesPerViewCount}
                   />
+                ) : (
+                  books.error && (
+                    <Center
+                      flexDir="column"
+                      mx="auto"
+                      textAlign="center"
+                      w="90%"
+                      h="70vh"
+                    >
+                      <ErrorMessage
+                        status={status}
+                        message="There was an error when attempting to retrieve book data, we're sorry for the inconvenience"
+                      />
+                    </Center>
+                  )
                 )}
               </Box>
             </Waypoint>
@@ -138,13 +168,96 @@ export default function Home({
           </SlideFade>
         </Box>
 
-        {/* Authors sections */}
-        <Box
+        {/* Authors/About us section */}
+        <Flex
+          pt="20"
           w="100%"
-          h="100vh"
           bgColor="brand.200"
           borderRadius="50% 50% 0 0 / 100px"
-        ></Box>
+          position="relative"
+          flexDir={{ base: "column", md: "row" }}
+          flexGrow={1}
+        >
+          <Box mb="10" mx="auto" w={{ base: "90%", md: "50%" }}>
+            <Heading my="10px" textAlign="center">
+              Authors
+            </Heading>
+            <Waypoint onEnter={authorsSectionState.onOpen}>
+              <Fade
+                transition={{ enter: { duration: 1 } }}
+                in={authorsSectionState.isOpen}
+              >
+                <Center textAlign="center" flexDir="column" my="10">
+                  <HStack spacing={3}>
+                    <Icon as={FaPen} boxSize={30} />
+                    <Icon as={FaUser} boxSize={30} />
+                    <Icon as={FaBook} boxSize={30} />
+                  </HStack>
+                  <Text mx="10" my="10">
+                    Discover more information about the authors available on our
+                    website
+                  </Text>
+                  <Link href="/authors">
+                    <Box
+                      as="button"
+                      aria-label="view_more_button"
+                      w={{ base: "60%", md: "35%" }}
+                      border="2px"
+                      borderColor="brand.300"
+                      textAlign="center"
+                      padding="3"
+                      transition="0.25s ease-out"
+                      _hover={{
+                        transform: "scale(1.1)",
+                        transition: "0.25s ease-out",
+                      }}
+                    >
+                      <Text h="100%">Browse authors</Text>
+                    </Box>
+                  </Link>
+                </Center>
+              </Fade>
+            </Waypoint>
+          </Box>
+
+          <Box textAlign="center" mx="auto" w={{ base: "90%", md: "50%" }}>
+            <Heading my="10px" textAlign="center">
+              About us
+            </Heading>
+            <Waypoint onEnter={aboutSectionState.onOpen}>
+              <Fade
+                transition={{ enter: { duration: 1 } }}
+                in={aboutSectionState.isOpen}
+              >
+                <Center flexDir="column" my="10">
+                  <Icon as={FaStoreAlt} boxSize={30} />
+                  <Text mx="10" my="10">
+                    Take a peek at our history, motivations, and goals moving
+                    forward
+                  </Text>
+                  <Link href="/about">
+                    <Box
+                      as="button"
+                      aria-label="view_more_button"
+                      w={{ base: "60%", md: "35%" }}
+                      border="2px"
+                      borderColor="brand.300"
+                      textAlign="center"
+                      padding="3"
+                      transition="0.25s ease-out"
+                      _hover={{
+                        transform: "scale(1.1)",
+                        transition: "0.25s ease-out",
+                      }}
+                    >
+                      <Text h="100%">Read about us</Text>
+                    </Box>
+                  </Link>
+                </Center>
+              </Fade>
+            </Waypoint>
+          </Box>
+        </Flex>
       </Fade>
     </Box>
   );

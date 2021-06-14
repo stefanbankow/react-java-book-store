@@ -22,7 +22,14 @@ export default function MobileNavbar({
   menuStatus,
 }: IMobileNavbarProps) {
   return (
-    <Flex zIndex="10" position="fixed" bg="brand.100" w="100%" h="70px">
+    <Flex
+      zIndex="10"
+      position="fixed"
+      bg="brand.100"
+      w="100%"
+      h="70px"
+      boxShadow="0 5px 5px rgba(0, 0, 0, 0.1)"
+    >
       <SimpleGrid px="5" mx="auto" columns={3} w="100%">
         <Flex justifyContent="left">
           <HStack>
