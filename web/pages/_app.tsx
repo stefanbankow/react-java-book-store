@@ -5,6 +5,7 @@ import type { AppProps } from "next/app";
 import PageLayout from "../components/Layout/PageLayout";
 import { UserProvider } from "@auth0/nextjs-auth0";
 import Head from "next/head";
+import React from "react";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (

@@ -10,11 +10,8 @@ import {
   DrawerBody,
   DrawerFooter,
   HStack,
-  Text,
   Button,
 } from "@chakra-ui/react";
-import NavbarLink from "../Navbar/DesktopNavbar/NavbarLink";
-import styles from "../../../styles/AnimatedUnderlineLink.module.css";
 import Link from "next/link";
 
 export interface ICartDrawerProps {

@@ -6,9 +6,7 @@ import DesktopNavbar from "./DesktopNavbar/DesktopNavbar";
 
 import MobileNavbar from "./MobileNavbar/MobileNavbar";
 
-export interface INavbarProps {}
-
-export default function Navbar(props: INavbarProps) {
+export default function Navbar() {
   const cartDrawerStatus = useDisclosure();
   const menuDrawerStatus = useDisclosure();
 

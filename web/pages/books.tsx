@@ -1,47 +1,37 @@
 import {
   Box,
-  Center,
   Container,
   Fade,
   Heading,
+  HStack,
   Icon,
   Input,
   InputGroup,
   InputLeftElement,
-  SimpleGrid,
   Text,
-  useBreakpointValue,
 } from "@chakra-ui/react";
-import BookCard from "../components/UI/Books/BookCard";
-import { BookProps, PaginatedBooksResponseProps } from "../types/BookTypes";
 import React from "react";
-import { InferGetServerSidePropsType } from "next";
 import { FiSearch } from "react-icons/fi";
-import ErrorMessage from "../components/UI/ErrorMessage";
 
-export interface IBooksPageProps {}
+import { useState } from "react";
+import SortByMenu from "../components/Pages/BooksPage/SortByMenu";
+import BookPageAbstraction from "../components/Pages/BooksPage/BooksPageAbstraction";
 
-export async function getServerSideProps() {
-  const res = await fetch(
-    `http://localhost:3000/api/store/books?page=0&size=20&sortBy=id&asc=false`
-  );
-  const books: PaginatedBooksResponseProps = await res.json();
-  return { props: { books, status: res.status } };
-}
+export default function BooksPage({}) {
+  const [page, setPage] = useState(0);
+  const [size] = useState(24);
+  const [sortBy, setSortBy] = useState("id");
+  const [asc, setAsc] = useState(false);
 
-export default function BooksPage({
-  books,
-  status,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const slidesPerViewCount = useBreakpointValue({
-    base: 1,
-    sm: 2,
-    md: 3,
-    lg: 4,
-    xl: 5,
-    "2xl": 6,
-    "3xl": 7,
-  });
+  const handleSortButtonClick = (value: string) => {
+    setSortBy(value);
+    setPage(0);
+  };
+
+  const handleAscButtonClick = (value: boolean) => {
+    setAsc(value);
+    setPage(0);
+  };
 
   return (
     <Box mx={{ base: "5", md: "10" }}>
@@ -55,49 +45,41 @@ export default function BooksPage({
             find a book to love.
           </Text>
         </Container>
-        <InputGroup my="10">
-          <InputLeftElement
-            pointerEvents="none"
-            children={<Icon as={FiSearch} />}
+        <HStack>
+          <SortByMenu
+            sortByValue={sortBy}
+            ascValue={asc}
+            handleSortButtonClick={handleSortButtonClick}
+            handleAscButtonClick={handleAscButtonClick}
           />
-          <Input placeholder="Book name, Author name, etc." />
-        </InputGroup>
-        {books.content ? (
-          <SimpleGrid
-            justifyContent="center"
-            my="5"
-            spacing={3}
-            columns={slidesPerViewCount}
-          >
-            {books.content.map((book: BookProps) => {
-              return (
-                <BookCard
-                  key={book.id}
-                  id={book.id}
-                  imgSrc={book.coverArtURL}
-                  title={book.title}
-                  authorName={book.author?.name}
-                  price={book.price}
-                />
-              );
-            })}
-          </SimpleGrid>
-        ) : (
-          books.error && (
-            <Center
-              flexDir="column"
-              mx="auto"
-              textAlign="center"
-              w="90%"
-              h="60vh"
-            >
-              <ErrorMessage
-                status={status}
-                message="There was an error when attempting to retrieve book data, we're sorry for the inconvenience"
-              />
-            </Center>
-          )
-        )}
+
+          <InputGroup>
+            <InputLeftElement
+              pointerEvents="none"
+              children={<Icon as={FiSearch} />}
+            />
+            <Input placeholder="Book name, Author name, etc." />
+          </InputGroup>
+        </HStack>
+
+        <BookPageAbstraction
+          page={page}
+          setPage={setPage}
+          sortBy={sortBy}
+          asc={asc}
+          size={size}
+        />
+
+        {/*Used to pre-render the next page*/}
+        <div style={{ display: "none" }}>
+          <BookPageAbstraction
+            page={page + 1}
+            setPage={setPage}
+            sortBy={sortBy}
+            asc={asc}
+            size={size}
+          />
+        </div>
       </Fade>
     </Box>
   );

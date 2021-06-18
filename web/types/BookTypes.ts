@@ -12,11 +12,8 @@ export interface BookProps {
 }
 
 export interface PaginatedBooksResponseProps {
-  content?: BookProps[];
-  error?: {
-    code: string;
-    errno: string;
-    message: string;
-    type: string;
-  };
+  content: BookProps[];
+  totalPages: number;
+  first: boolean;
+  last: boolean;
 }

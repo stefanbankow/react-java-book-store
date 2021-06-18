@@ -21,7 +21,6 @@ export default function Footer() {
         bgColor="brand.100"
         boxShadow="0 -5px 5px rgba(0, 0, 0, 0.1)"
         p="10"
-        height="min-content"
         flexDir={{ base: "column", md: "row" }}
       >
         <Flex

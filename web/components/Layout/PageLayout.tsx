@@ -9,12 +9,13 @@ export interface IPageLayoutProps {
 
 export default function PageLayout({ children }: IPageLayoutProps) {
   return (
-    <Flex h="100vh" flexDir="column">
+    <Flex minH="100vh" flexDir="column">
       <Navbar />
       <Box mt="70px">{children}</Box>
 
-      <Box position="absolute" bottom="0" w="100%" mt="auto" />
-      <Footer />
+      <Box position="relative" bottom="0" w="100%" mt="auto">
+        <Footer />
+      </Box>
     </Flex>
   );
 }
