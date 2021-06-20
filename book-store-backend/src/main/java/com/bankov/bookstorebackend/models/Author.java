@@ -14,10 +14,13 @@ public class Author {
     @NotNull(message = "Author must have a name")
     @Length(min = 1, message = "Author's name must not be empty")
     private String name;
+
+    @Column(length = 1000)
     private String description;
 
 
     @URL(message = "You must provide a valid link to an image")
+    @Column(length = 1000)
     private String imageURL;
 
     private Integer yearBorn;
