@@ -34,11 +34,13 @@ export default function ErrorMessage({
       );
       break;
     case 404:
-      <>
-        <Text fontSize="md" color="red.400">
-          Status: {status} Not Found
-        </Text>
-      </>;
+      informationText = (
+        <>
+          <Text fontSize="md" color="red.400">
+            Status: {status} Not Found
+          </Text>
+        </>
+      );
       break;
     default:
       break;
