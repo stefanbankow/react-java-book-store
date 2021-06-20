@@ -9,8 +9,8 @@ import {
 } from "pure-react-carousel";
 import "pure-react-carousel/dist/react-carousel.es.css";
 import { Box, Flex, Icon } from "@chakra-ui/react";
-import BookCard from "../../../UI/Books/BookCard";
-import { BookProps } from "../../../../types/BookTypes";
+import BookCard from "./BookCard";
+import { BookProps } from "../../../types/BookTypes";
 
 export interface ILatestBooksCarouselProps {
   books: BookProps[];

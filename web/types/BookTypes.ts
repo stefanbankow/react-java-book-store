@@ -1,3 +1,4 @@
+import { AuthorProps } from "./AuthorTypes";
 export interface BookProps {
   id: number;
   title: string;
@@ -6,9 +7,7 @@ export interface BookProps {
   coverArtURL?: string;
   yearOfRelease?: number;
   forSale: boolean;
-  author: {
-    name: string;
-  };
+  author: AuthorProps;
 }
 
 export interface PaginatedBooksResponseProps {

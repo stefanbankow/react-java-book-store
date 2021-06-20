@@ -6,11 +6,12 @@ import {
   FiChevronRight,
   FiChevronsRight,
 } from "react-icons/fi";
+import { PaginatedAuthorsResponseProps } from "../../../../types/AuthorTypes";
 import { PaginatedBooksResponseProps } from "../../../../types/BookTypes";
 import PaginationButton from "./PaginationButton";
 
 export interface IPaginationButtonsWrapperProps {
-  data: PaginatedBooksResponseProps;
+  data: PaginatedBooksResponseProps | PaginatedAuthorsResponseProps;
   page: number;
   handlePaginationButtonClick: (value: number) => void;
 }

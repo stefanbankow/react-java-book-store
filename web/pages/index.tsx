@@ -23,7 +23,7 @@ import { InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 
 //Components
-import LatestBooksCarousel from "../components/Pages/HomePage/Carousel/LatestBooksCarousel";
+import LatestBooksCarousel from "../components/UI/Books/LatestBooksCarousel";
 import ErrorMessage from "../components/UI/ErrorMessage";
 
 //PropTypes
@@ -128,7 +128,7 @@ export default function Home({
                     slidesPerViewCount={slidesPerViewCount}
                   />
                 ) : (
-                  books.error && (
+                  status != 200 && (
                     <Center
                       flexDir="column"
                       mx="auto"

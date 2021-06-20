@@ -9,12 +9,15 @@ import {
 import { useRouter } from "next/router";
 import React from "react";
 import useSWR from "swr";
-import { BookProps } from "../../../types/BookTypes";
-import BookCard from "../../UI/Books/BookCard";
-import ErrorMessage from "../../UI/ErrorMessage";
-import PaginationButtonsComponent from "../../UI/Buttons/Pagination/PaginationButtonsWrapper";
+import ErrorMessage from "../ErrorMessage";
+import PaginationButtonsComponent from "../Buttons/Pagination/PaginationButtonsWrapper";
+import AuthorCard from "./AuthorCard";
+import {
+  AuthorProps,
+  PaginatedAuthorsResponseProps,
+} from "../../../types/AuthorTypes";
 
-export interface IBooksPageAbstractionProps {
+export interface IAuthorsPageAbstractionProps {
   page: number;
   setPage: React.Dispatch<React.SetStateAction<number>>;
   size: number;
@@ -22,7 +25,7 @@ export interface IBooksPageAbstractionProps {
   asc: boolean;
 }
 
-const bookFetcher = async (url: string) => {
+const authorsFetcher = async (url: string) => {
   const res = await fetch(url);
 
   if (!res.ok) {
@@ -35,13 +38,31 @@ const bookFetcher = async (url: string) => {
   return res.json();
 };
 
-export default function BooksPageAbstraction({
+function useAuthors(
+  page: number | undefined,
+  size: number | undefined,
+  sortBy: string | undefined,
+  asc: boolean | undefined
+) {
+  const { data, error } = useSWR(
+    `/api/store/authors?page=${page}&size=${size}&sortBy=${sortBy}&asc=${asc}`,
+    authorsFetcher
+  );
+
+  return {
+    data: data as PaginatedAuthorsResponseProps,
+    isLoading: !error && !data,
+    error,
+  };
+}
+
+export default function AuthorsPageAbstraction({
   asc,
   page,
   size,
   sortBy,
   setPage,
-}: IBooksPageAbstractionProps) {
+}: IAuthorsPageAbstractionProps) {
   const slidesPerViewCount = useBreakpointValue({
     base: 1,
     sm: 2,
@@ -49,19 +70,16 @@ export default function BooksPageAbstraction({
     lg: 4,
   });
 
-  const router = useRouter();
+  const { data, error, isLoading } = useAuthors(page, size, sortBy, asc);
 
-  const { data, error } = useSWR(
-    `/api/store/books?page=${page}&size=${size}&sortBy=${sortBy}&asc=${asc}`,
-    bookFetcher
-  );
+  const router = useRouter();
 
   const handlePaginationButtonClick = (pageIndex: number) => {
     setPage(pageIndex);
-    router.replace("/books");
+    router.replace("/authors");
   };
 
-  if (!error && !data)
+  if (isLoading)
     return (
       <Flex my="20" minH="55vh">
         <Center my="auto" w="100%">
@@ -81,7 +99,7 @@ export default function BooksPageAbstraction({
       >
         <ErrorMessage
           status={error.status}
-          message="There was an error when attempting to retrieve book data, we're sorry for the inconvenience"
+          message="There was an error when attempting to retrieve author data, we're sorry for the inconvenience"
         />
       </Center>
     );
@@ -94,15 +112,16 @@ export default function BooksPageAbstraction({
           columns={slidesPerViewCount}
           my="5"
         >
-          {data?.content.map((book: BookProps) => {
+          {data?.content.map((author: AuthorProps) => {
             return (
-              <BookCard
-                key={book.id}
-                id={book.id}
-                imgSrc={book.coverArtURL}
-                title={book.title}
-                authorName={book.author?.name}
-                price={book.price}
+              <AuthorCard
+                key={author.id}
+                id={author.id}
+                name={author.name}
+                description={author.description}
+                yearBorn={author.yearBorn}
+                yearOfDeath={author.yearOfDeath}
+                imageURL={author.imageURL}
               />
             );
           })}

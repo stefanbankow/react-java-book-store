@@ -6,14 +6,13 @@ import {
   Flex,
   Icon,
   Image,
-  Skeleton,
   Spacer,
   Stack,
   Text,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
-import { FiShoppingCart, FiHeart } from "react-icons/fi";
+import { FiShoppingCart, FiHeart, FiBookOpen } from "react-icons/fi";
 
 export interface ILatestBookCardProps {
   id: number;
@@ -30,7 +29,6 @@ export default function LatestBookCard({
   authorName,
   price,
 }: ILatestBookCardProps) {
-  const [imgLoaded, setImgLoaded] = useState(false);
   return (
     <Box py="5px">
       <Flex
@@ -56,14 +54,7 @@ export default function LatestBookCard({
             }}
           >
             <AspectRatio m="10px auto" w="75%" ratio={0.68}>
-              <Skeleton isLoaded={imgLoaded}>
-                <Image
-                  src={imgSrc}
-                  alt="Image Cover"
-                  onLoad={() => setImgLoaded(true)}
-                  onError={() => setImgLoaded(true)}
-                />
-              </Skeleton>
+              <Image src={imgSrc} fallback={<Icon as={FiBookOpen} />} />
             </AspectRatio>
             <Stack direction="column" spacing={2.5} mx="auto" w="100%" flex={1}>
               <Center mx="3" flexDir="column" textAlign="center">

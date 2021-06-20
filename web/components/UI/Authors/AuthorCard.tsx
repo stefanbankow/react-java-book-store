@@ -2,14 +2,15 @@ import {
   Box,
   Flex,
   AspectRatio,
-  Skeleton,
   Stack,
   Center,
   Text,
   Image,
+  Icon,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
+import { FiUser } from "react-icons/fi";
 
 export interface IAuthorProps {
   id: number;
@@ -26,7 +27,6 @@ export default function AuthorCard({
   yearBorn,
   imageURL,
 }: IAuthorProps) {
-  const [imgLoaded, setImgLoaded] = useState(false);
   return (
     <Box py="5px">
       <Flex
@@ -53,14 +53,7 @@ export default function AuthorCard({
             }}
           >
             <AspectRatio m="10px auto" w="75%" ratio={0.68}>
-              <Skeleton isLoaded={imgLoaded}>
-                <Image
-                  src={imageURL}
-                  alt="Image Cover"
-                  onLoad={() => setImgLoaded(true)}
-                  onError={() => setImgLoaded(true)}
-                />
-              </Skeleton>
+              <Image src={imageURL} fallback={<Icon as={FiUser} />} />
             </AspectRatio>
             <Stack direction="column" mx="auto" w="100%" flex={1}>
               <Center mx="3" flexDir="column" textAlign="center">

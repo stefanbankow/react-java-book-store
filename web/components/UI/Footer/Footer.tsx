@@ -21,11 +21,11 @@ export default function Footer() {
         bgColor="brand.100"
         boxShadow="0 -5px 5px rgba(0, 0, 0, 0.1)"
         p="10"
-        flexDir={{ base: "column", md: "row" }}
+        flexDir={{ base: "column", sm: "row" }}
       >
         <Flex
-          justifyContent={{ base: "center", md: "left" }}
-          textAlign={{ base: "center", md: "left" }}
+          justifyContent={{ base: "center", sm: "left" }}
+          textAlign={{ base: "center", sm: "left" }}
           flexDir="column"
         >
           <Text fontWeight="bold" fontSize="md">
@@ -52,14 +52,14 @@ export default function Footer() {
 
         <Spacer />
         <Stack
-          direction={{ base: "column", md: "row" }}
+          direction={{ base: "column", sm: "row" }}
           justifyContent="center"
           spacing={3}
         >
           <Flex
             mx="5"
-            flexDir={{ base: "row", md: "column" }}
-            justifyContent={{ base: "center", md: "left" }}
+            flexDir={{ base: "row", sm: "column" }}
+            justifyContent={{ base: "center", sm: "left" }}
           >
             <VStack>
               <Text fontSize="sm" fontWeight="bold">
