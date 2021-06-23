@@ -11,6 +11,7 @@ export interface AuthorProps {
 export interface PaginatedAuthorsResponseProps {
   content: AuthorProps[];
   totalPages: number;
+  totalElements: number;
   first: boolean;
   last: boolean;
 }

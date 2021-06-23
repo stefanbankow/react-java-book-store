@@ -13,6 +13,7 @@ export interface BookProps {
 export interface PaginatedBooksResponseProps {
   content: BookProps[];
   totalPages: number;
+  totalElements: number;
   first: boolean;
   last: boolean;
 }

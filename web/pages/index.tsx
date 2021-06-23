@@ -119,7 +119,7 @@ export default function Home({
           >
             <Waypoint onEnter={latestBooksState.onOpen}>
               <Box>
-                {books.content ? (
+                {books.totalElements ? (
                   <LatestBooksCarousel
                     books={books.content}
                     totalSlides={
@@ -127,21 +127,32 @@ export default function Home({
                     }
                     slidesPerViewCount={slidesPerViewCount}
                   />
+                ) : status != 200 ? (
+                  <Center
+                    flexDir="column"
+                    mx="auto"
+                    textAlign="center"
+                    w="90%"
+                    h="70vh"
+                  >
+                    <ErrorMessage
+                      status={status}
+                      message="There was an error when attempting to retrieve book data, we're sorry for the inconvenience"
+                    />
+                  </Center>
                 ) : (
-                  status != 200 && (
-                    <Center
-                      flexDir="column"
-                      mx="auto"
-                      textAlign="center"
-                      w="90%"
-                      h="70vh"
-                    >
-                      <ErrorMessage
-                        status={status}
-                        message="There was an error when attempting to retrieve book data, we're sorry for the inconvenience"
-                      />
-                    </Center>
-                  )
+                  <Center
+                    flexDir="column"
+                    mx="auto"
+                    textAlign="center"
+                    w="90%"
+                    h="70vh"
+                  >
+                    <ErrorMessage
+                      status={status}
+                      message="There are no books available at this time, check back later!"
+                    />
+                  </Center>
                 )}
               </Box>
             </Waypoint>

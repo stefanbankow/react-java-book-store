@@ -39,7 +39,7 @@ export default function AuthorSortByMenu({
             onClick={() => handleSortButtonClick("id")}
             value="id"
           >
-            Latest
+            Date Added
           </MenuItemOption>
           <MenuItemOption
             onClick={() => handleSortButtonClick("name")}

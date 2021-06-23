@@ -62,7 +62,7 @@ export default function SingleBookPage() {
 
   if (isLoading)
     pageData = (
-      <Center mx="auto" my="20">
+      <Center mx="auto" my="20" h="80vh">
         <Spinner size="lg" />
       </Center>
     );
@@ -74,7 +74,7 @@ export default function SingleBookPage() {
         my="10"
         textAlign="center"
         w="90%"
-        h="60vh"
+        h="80vh"
       >
         <ErrorMessage
           status={isError?.status}
@@ -85,74 +85,82 @@ export default function SingleBookPage() {
   else {
     const descriptionLength = data.description ? data.description.length : 0;
     pageData = (
-      <Box mx="auto">
-        <Flex flexDir={{ base: "column", lg: "row" }}>
-          <Box
-            w={{ base: "100%", sm: "70%", lg: "30%" }}
-            my="5"
-            mx={{ base: "auto", lg: "10%" }}
-          >
-            <AspectRatio mx="auto" w={"100%"} ratio={0.68}>
-              <Image src={data.imageURL} fallback={<Icon as={FiUser} />} />
-            </AspectRatio>
-          </Box>
-          <Flex
-            flexGrow={1}
-            flexDir="column"
-            justifyContent={{ base: "center", lg: "left" }}
-            textAlign={{ base: "center", lg: "left" }}
-            mx="10"
-          >
-            <Heading my="5">{data.name}</Heading>
-            <Text fontWeight="bold">
-              {data.yearBorn}
-              {data.yearOfDeath ? " - " + data.yearOfDeath : null}
-            </Text>
-
-            <Text my="10">Description:</Text>
-            {!data.description ? (
-              <Text>No description given</Text>
-            ) : descriptionLength > 180 ? (
-              <>
-                <Collapse startingHeight={70} in={show}>
-                  <Text maxW="60ch">{data.description}</Text>
-                </Collapse>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleToggle}
-                  mt="1rem"
-                >
-                  Show {show ? "Less" : "More"}
-                </Button>
-              </>
-            ) : (
-              <Text maxW="60ch">{data.description}</Text>
-            )}
-
-            <Spacer />
-            <Stack
-              my="10"
-              direction={{ base: "column", lg: "row" }}
-              justifyContent={{ base: "center", lg: "left" }}
-              spacing={3}
+      <Fade in>
+        <Box mx="auto">
+          <Flex flexDir={{ base: "column", lg: "row" }}>
+            <Box
+              w={{ base: "100%", sm: "70%", lg: "50%", xl: "25%" }}
+              my="5"
+              mx={{ base: "auto", lg: "10%" }}
             >
-              <HStack justifyContent={{ base: "center", lg: "left" }}>
-                <Button leftIcon={<Icon as={FiHeart} />} variant="ghost">
-                  Favorite
-                </Button>
-              </HStack>
-            </Stack>
+              <AspectRatio mx="auto" w={"100%"} ratio={0.68}>
+                <Image src={data.imageURL} fallback={<Icon as={FiUser} />} />
+              </AspectRatio>
+            </Box>
+            <Flex
+              flexGrow={1}
+              flexDir="column"
+              justifyContent={{ base: "center", lg: "left" }}
+              textAlign={{ base: "center", lg: "left" }}
+              mx="10"
+            >
+              <Heading my="5">{data.name}</Heading>
+              <Text fontWeight="bold">
+                {data.yearBorn}
+                {data.yearOfDeath ? " - " + data.yearOfDeath : null}
+              </Text>
+
+              <Text my="10">Description:</Text>
+              {!data.description ? (
+                <Text>No description given</Text>
+              ) : descriptionLength > 180 ? (
+                <>
+                  <Collapse startingHeight={70} in={show}>
+                    <Text mx="auto" maxW="60ch">
+                      {data.description}
+                    </Text>
+                  </Collapse>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleToggle}
+                    mt="1rem"
+                  >
+                    Show {show ? "Less" : "More"}
+                  </Button>
+                </>
+              ) : (
+                <Text mx="auto" maxW="60ch">
+                  {data.description}
+                </Text>
+              )}
+
+              <Spacer />
+              <Stack
+                my="10"
+                direction={{ base: "column", lg: "row" }}
+                justifyContent={{ base: "center", lg: "left" }}
+                spacing={3}
+              >
+                <HStack justifyContent={{ base: "center", lg: "left" }}>
+                  <Button leftIcon={<Icon as={FiHeart} />} variant="ghost">
+                    Favorite
+                  </Button>
+                </HStack>
+              </Stack>
+            </Flex>
           </Flex>
-        </Flex>
-      </Box>
+        </Box>
+      </Fade>
     );
   }
   return (
     <Box mx={{ base: "5", md: "10" }}>
-      <Container maxW="100%" my="10">
-        <Fade in>{pageData}</Fade>
-      </Container>
+      <Fade in transition={{ enter: { duration: 1 } }}>
+        <Container maxW="100%" my="10">
+          {pageData}
+        </Container>
+      </Fade>
     </Box>
   );
 }

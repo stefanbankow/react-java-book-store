@@ -81,7 +81,7 @@ export default function AuthorsPageAbstraction({
 
   if (isLoading)
     return (
-      <Flex my="20" minH="55vh">
+      <Flex my="20" minH="80vh">
         <Center my="auto" w="100%">
           <Spinner size="xl" />
         </Center>
@@ -95,7 +95,7 @@ export default function AuthorsPageAbstraction({
         my="10"
         textAlign="center"
         w="90%"
-        h="60vh"
+        h="80vh"
       >
         <ErrorMessage
           status={error.status}
