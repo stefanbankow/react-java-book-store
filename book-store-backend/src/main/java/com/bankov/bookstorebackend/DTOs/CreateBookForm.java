@@ -5,18 +5,19 @@ import org.hibernate.validator.constraints.URL;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 public class CreateBookForm {
     @NotNull(message = "Book must have a title")
-    @Max(value = 255, message = "Title must not exceed 255 characters")
+    @Size(min = 1, max = 255, message = "Title be between 1 and 255 characters")
     private final String title;
 
-    @Max(value = 1000, message = "Title must not exceed 1000 characters")
+    @Size(min = 1, max = 2000, message = "Description must be between 1 and 2000 characters")
     private final String description;
 
 
     @URL(message = "You must provide a valid url to an image")
-    @Max(value = 1000, message = "URL must not exceed 1000 characters")
+    @Size(min = 1, max = 1000, message = "URL must be between 1 and 1000 characters")
     private final String coverArtURL;
 
     @NotNull(message = "Book must have a price")

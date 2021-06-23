@@ -15,7 +15,7 @@ public class Author {
     @Length(min = 1, message = "Author's name must not be empty")
     private String name;
 
-    @Column(length = 1000)
+    @Column(length = 2000)
     private String description;
 
 

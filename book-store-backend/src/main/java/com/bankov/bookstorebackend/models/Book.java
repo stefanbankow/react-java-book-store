@@ -9,7 +9,7 @@ public class Book {
     private Long id;
     private String title;
 
-    @Column(length = 1000)
+    @Column(length = 2000)
     private String description;
     @Column(length = 1000)
     private String coverArtURL;
