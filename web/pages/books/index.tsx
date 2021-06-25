@@ -13,8 +13,8 @@ import {
 import React from "react";
 import { FiSearch } from "react-icons/fi";
 import { useState } from "react";
-import SortByMenu from "../components/UI/Books/SortByMenu";
-import BookPageAbstraction from "../components/UI/Books/BooksPageAbstraction";
+import SortByMenu from "../../components/UI/Books/SortByMenu";
+import BookPageAbstraction from "../../components/UI/Books/BooksPageAbstraction";
 
 export default function BooksPage({}) {
   const [page, setPage] = useState(0);

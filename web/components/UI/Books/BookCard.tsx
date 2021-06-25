@@ -9,31 +9,28 @@ import {
   Spacer,
   Stack,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import React from "react";
 import Link from "next/link";
 import { FiShoppingCart, FiHeart, FiBookOpen } from "react-icons/fi";
+import { useAppDispatch } from "../../../redux/hooks";
+import { addItem } from "../../../redux/slices/cartSlice";
+import { BookProps } from "../../../types/BookTypes";
 
-export interface ILatestBookCardProps {
-  id: number;
-  imgSrc?: string;
-  title: string;
-  authorName: string;
-  price: number;
+interface BookCardProps {
+  book: BookProps;
 }
 
-export default function LatestBookCard({
-  id,
-  imgSrc,
-  title,
-  authorName,
-  price,
-}: ILatestBookCardProps) {
+export default function LatestBookCard({ book }: BookCardProps) {
+  const dispatch = useAppDispatch();
+  const toast = useToast();
+
   return (
     <Box py="5px">
       <Flex
         boxShadow="0 10px 10px rgba(0, 0, 0, 0.25)"
-        borderRadius="5px"
+        borderRadius={5}
         flexDir="column"
         maxW="90%"
         mx="auto"
@@ -44,7 +41,7 @@ export default function LatestBookCard({
           transition: "0.2s ease",
         }}
       >
-        <Link href={`/books/${id}`}>
+        <Link href={`/books/${book.id}`}>
           <Box
             w="100%"
             transition="0.2s ease"
@@ -54,7 +51,10 @@ export default function LatestBookCard({
             }}
           >
             <AspectRatio m="10px auto" w="75%" ratio={0.68}>
-              <Image src={imgSrc} fallback={<Icon as={FiBookOpen} />} />
+              <Image
+                src={book.coverArtURL}
+                fallback={<Icon as={FiBookOpen} />}
+              />
             </AspectRatio>
             <Stack direction="column" spacing={2.5} mx="auto" w="100%" flex={1}>
               <Center mx="3" flexDir="column" textAlign="center">
@@ -64,14 +64,14 @@ export default function LatestBookCard({
                   fontSize={["md", "md", "md", "md", "md", "lg"]}
                   minH="3em"
                 >
-                  {title}
+                  {book.title}
                 </Text>
                 <Text
                   my="2"
                   noOfLines={1}
                   fontSize={["sn", "sm", "sm", "sm", "sm", "md"]}
                 >
-                  {authorName}
+                  {book.author?.name}
                 </Text>
               </Center>
             </Stack>
@@ -92,7 +92,7 @@ export default function LatestBookCard({
             fontSize={["md", "md", "md", "lg", "lg", "xl"]}
             fontWeight="italic"
           >
-            {(price / 100).toFixed(2) + "$"}
+            {(book.price / 100).toFixed(2) + "$"}
           </Box>
           <Spacer />
           <Icon
@@ -110,6 +110,17 @@ export default function LatestBookCard({
             as={FiShoppingCart}
             transition="0.2s ease"
             boxSize="5"
+            onClick={() => {
+              dispatch(addItem(book));
+              toast({
+                title: `Added "${book.title}" to cart`,
+                duration: 1500,
+                isClosable: true,
+                position: "top-right",
+                status: "success",
+                variant: "subtle",
+              });
+            }}
             _hover={{
               transform: "scale(1.25)",
               transition: "0.2s ease",

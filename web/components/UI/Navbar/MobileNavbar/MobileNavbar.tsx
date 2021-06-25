@@ -11,6 +11,7 @@ import * as React from "react";
 import HomePageLink from "../HomePageLink";
 import MobileCart from "../MobileNavbar/MobileCartButton";
 import MobileButtonWrapper from "../../Buttons/MobileButtonWrapper";
+import { useAppSelector } from "../../../../redux/hooks";
 
 export interface IMobileNavbarProps {
   menuStatus: UseDisclosureProps;
@@ -21,6 +22,7 @@ export default function MobileNavbar({
   cartStatus,
   menuStatus,
 }: IMobileNavbarProps) {
+  const cartItems = useAppSelector((state) => state.cart.items);
   return (
     <Flex
       zIndex="10"
@@ -61,7 +63,7 @@ export default function MobileNavbar({
               ariaLabel="mobile_cart_drawer"
               onClick={cartStatus.onOpen}
             >
-              <MobileCart />
+              <MobileCart itemCount={cartItems.length} />
             </MobileButtonWrapper>
           </HStack>
         </Flex>

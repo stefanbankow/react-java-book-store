@@ -12,8 +12,8 @@ import {
 import React from "react";
 import { useState } from "react";
 import { FiSearch } from "react-icons/fi";
-import AuthorSortByMenu from "../components/UI/Authors/AuthorSortByMenu";
-import AuthorsPageAbstraction from "../components/UI/Authors/AuthorsPageAbstraction";
+import AuthorSortByMenu from "../../components/UI/Authors/AuthorSortByMenu";
+import AuthorsPageAbstraction from "../../components/UI/Authors/AuthorsPageAbstraction";
 
 export interface IAuthorsPageProps {}
 

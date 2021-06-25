@@ -113,16 +113,7 @@ export default function BooksPageAbstraction({
           my="5"
         >
           {data.content.map((book: BookProps) => {
-            return (
-              <BookCard
-                key={book.id}
-                id={book.id}
-                imgSrc={book.coverArtURL}
-                title={book.title}
-                authorName={book.author?.name}
-                price={book.price}
-              />
-            );
+            return <BookCard key={book.id} book={book} />;
           })}
         </SimpleGrid>
         <PaginationButtonsComponent

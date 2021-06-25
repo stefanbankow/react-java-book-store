@@ -12,6 +12,7 @@ import NavbarLink from "./NavbarLink";
 import MyDivider from "../../Divider";
 import styles from "../../../../styles/AnimatedUnderlineLink.module.css";
 import { useUser } from "@auth0/nextjs-auth0";
+import { useAppSelector } from "../../../../redux/hooks";
 
 export interface IDesktopNavbarProps {
   cartStatus: UseDisclosureProps;
@@ -19,6 +20,8 @@ export interface IDesktopNavbarProps {
 
 export default function DesktopNavbar({ cartStatus }: IDesktopNavbarProps) {
   const { isLoading, user } = useUser();
+
+  const items = useAppSelector((state) => state.cart.items);
   return (
     <Flex
       boxShadow="0 5px 5px rgba(0, 0, 0, 0.1)"
@@ -58,7 +61,7 @@ export default function DesktopNavbar({ cartStatus }: IDesktopNavbarProps) {
           <MyDivider width="1px" orientation="vertical" />
           <Box as="button" aria-label="desktop_cart_button">
             <a onClick={cartStatus.onOpen} className={styles.navbarLink}>
-              <Text textAlign="center">Cart 3</Text>
+              <Text textAlign="center">Cart {items.length}</Text>
             </a>
           </Box>
         </HStack>

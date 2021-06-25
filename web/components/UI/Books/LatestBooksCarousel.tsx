@@ -41,13 +41,7 @@ export default function LatestBooksCarousel({
                 className="slide"
                 index={index}
               >
-                <BookCard
-                  id={book.id}
-                  imgSrc={book.coverArtURL}
-                  title={book.title}
-                  authorName={book.author?.name}
-                  price={book.price}
-                />
+                <BookCard book={book} />
               </Slide>
             ))}
           </Slider>

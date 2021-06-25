@@ -23,6 +23,8 @@ import ErrorMessage from "../../components/UI/ErrorMessage";
 import { BookProps } from "../../types/BookTypes";
 import { FiShoppingCart, FiHeart, FiBookOpen } from "react-icons/fi";
 import Link from "next/link";
+import { useAppDispatch } from "../../redux/hooks";
+import { addItem } from "../../redux/slices/cartSlice";
 
 const bookFetcher = async (url: string) => {
   const res = await fetch(url);
@@ -55,6 +57,8 @@ export default function SingleBookPage() {
   const [show, setShow] = React.useState(false);
 
   const handleToggle = () => setShow(!show);
+
+  const dispatch = useAppDispatch();
 
   let pageData;
 
@@ -157,6 +161,7 @@ export default function SingleBookPage() {
                   </Button>
 
                   <Button
+                    onClick={() => dispatch(addItem(data))}
                     leftIcon={<Icon as={FiShoppingCart} />}
                     variant="ghost"
                   >
