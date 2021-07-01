@@ -22,25 +22,10 @@ import useSWR from "swr";
 import ErrorMessage from "../../components/UI/ErrorMessage";
 import { FiHeart, FiUser } from "react-icons/fi";
 import { AuthorProps } from "../../types/AuthorTypes";
-
-const authorFetcher = async (url: string) => {
-  const res = await fetch(url);
-
-  if (!res.ok) {
-    const error: any = new Error("An error occurred while fetching the data.");
-    // Attach extra info to the error object.
-    error.info = await res.json();
-    error.status = res.status;
-    throw error;
-  }
-  return res.json();
-};
+import { fetcher } from "../../lib/fetcher";
 
 function useSingleBook(id?: string | string[] | number) {
-  const { data, error } = useSWR(
-    () => `/api/store/authors/${id}`,
-    authorFetcher
-  );
+  const { data, error } = useSWR(() => `/api/store/authors/${id}`, fetcher);
 
   return {
     data: data as AuthorProps,

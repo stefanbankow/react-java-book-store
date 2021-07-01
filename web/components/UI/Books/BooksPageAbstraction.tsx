@@ -16,6 +16,7 @@ import {
 import BookCard from "./BookCard";
 import ErrorMessage from "../ErrorMessage";
 import PaginationButtonsComponent from "../Buttons/Pagination/PaginationButtonsWrapper";
+import { fetcher } from "../../../lib/fetcher";
 
 export interface IBooksPageAbstractionProps {
   page: number;
@@ -25,19 +26,6 @@ export interface IBooksPageAbstractionProps {
   asc: boolean;
 }
 
-const bookFetcher = async (url: string) => {
-  const res = await fetch(url);
-
-  if (!res.ok) {
-    const error: any = new Error("An error occurred while fetching the data.");
-    // Attach extra info to the error object.
-    error.info = await res.json();
-    error.status = res.status;
-    throw error;
-  }
-  return res.json();
-};
-
 function useBooks(
   page: number | undefined,
   size: number | undefined,
@@ -46,7 +34,7 @@ function useBooks(
 ) {
   const { data, error } = useSWR(
     `/api/store/books?page=${page}&size=${size}&sortBy=${sortBy}&asc=${asc}`,
-    bookFetcher
+    fetcher
   );
 
   return {

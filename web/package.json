@@ -14,6 +14,7 @@
     "@emotion/styled": "^11",
     "@reduxjs/toolkit": "^1.6.0",
     "axios": "^0.21.1",
+    "formik": "^2.2.9",
     "framer-motion": "^4",
     "next": "10.2.3",
     "pure-react-carousel": "^1.27.6",

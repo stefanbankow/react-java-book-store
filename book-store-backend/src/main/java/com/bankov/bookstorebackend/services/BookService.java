@@ -45,7 +45,7 @@ public class BookService {
         Book newBook = book.toBook();
         if(authorId != null) {
             Author bookAuthor = authorRepository.findById(authorId)
-                    .orElseThrow(() -> new ResourceNotFoundException("author", "AuthorId not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("authorId", "There is no author with this ID"));
             newBook.setAuthor(bookAuthor);
         }
         bookRepository.save(newBook);
@@ -54,6 +54,11 @@ public class BookService {
 
     public Optional<Book> update(Long id, CreateBookForm newBook) {
         return bookRepository.findById(id).map(book -> {
+            if(newBook.getAuthorId() != book.getAuthor().getId()) {
+                Author bookAuthor = authorRepository.findById(newBook.getAuthorId())
+                        .orElseThrow(() -> new ResourceNotFoundException("authorId", "There is no author with this ID"));
+                book.setAuthor(bookAuthor);
+            }
             book.updateWith(newBook.toBook());
             return bookRepository.save(book);
         });

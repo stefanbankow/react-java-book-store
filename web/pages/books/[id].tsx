@@ -17,7 +17,7 @@ import {
   Collapse,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useState } from "react";
 import useSWR from "swr";
 import ErrorMessage from "../../components/UI/ErrorMessage";
 import { BookProps } from "../../types/BookTypes";
@@ -25,22 +25,10 @@ import { FiShoppingCart, FiHeart, FiBookOpen } from "react-icons/fi";
 import Link from "next/link";
 import { useAppDispatch } from "../../redux/hooks";
 import { addItem } from "../../redux/slices/cartSlice";
-
-const bookFetcher = async (url: string) => {
-  const res = await fetch(url);
-
-  if (!res.ok) {
-    const error: any = new Error("An error occurred while fetching the data.");
-    // Attach extra info to the error object.
-    error.info = await res.json();
-    error.status = res.status;
-    throw error;
-  }
-  return res.json();
-};
+import { fetcher } from "../../lib/fetcher";
 
 function useSingleBook(id?: string | string[] | number) {
-  const { data, error } = useSWR(() => `/api/store/books/${id}`, bookFetcher);
+  const { data, error } = useSWR(() => `/api/store/books/${id}`, fetcher);
 
   return {
     data: data as BookProps,
@@ -54,7 +42,7 @@ export default function SingleBookPage() {
 
   const { data, isError, isLoading } = useSingleBook(router.query.id);
 
-  const [show, setShow] = React.useState(false);
+  const [show, setShow] = useState(false);
 
   const handleToggle = () => setShow(!show);
 

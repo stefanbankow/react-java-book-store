@@ -10,16 +10,18 @@ import * as React from "react";
 import HomePageLink from "../HomePageLink";
 import NavbarLink from "./NavbarLink";
 import MyDivider from "../../Divider";
-import styles from "../../../../styles/AnimatedUnderlineLink.module.css";
-import { useUser } from "@auth0/nextjs-auth0";
 import { useAppSelector } from "../../../../redux/hooks";
+import { useUserWithRole } from "../../../../pages/admin";
+import UserMenu from "./UserMenu";
+
+import styles from "../../../../styles/AnimatedUnderlineLink.module.css";
 
 export interface IDesktopNavbarProps {
   cartStatus: UseDisclosureProps;
 }
 
 export default function DesktopNavbar({ cartStatus }: IDesktopNavbarProps) {
-  const { isLoading, user } = useUser();
+  const { isLoading, data } = useUserWithRole();
 
   const items = useAppSelector((state) => state.cart.items);
   return (
@@ -51,8 +53,8 @@ export default function DesktopNavbar({ cartStatus }: IDesktopNavbarProps) {
         <HStack justifyContent="right" spacing={{ base: "1rem", lg: "2rem" }}>
           {isLoading ? (
             <div />
-          ) : user ? (
-            <NavbarLink link="/api/auth/logout">{user.name!}</NavbarLink>
+          ) : data && data.user ? (
+            <UserMenu user={data.user} isAdmin={data.isAdmin} />
           ) : (
             <>
               <NavbarLink link="/api/auth/login">Sign in / Sign up</NavbarLink>

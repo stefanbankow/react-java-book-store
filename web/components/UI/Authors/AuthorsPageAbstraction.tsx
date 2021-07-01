@@ -16,6 +16,7 @@ import {
   AuthorProps,
   PaginatedAuthorsResponseProps,
 } from "../../../types/AuthorTypes";
+import { fetcher } from "../../../lib/fetcher";
 
 export interface IAuthorsPageAbstractionProps {
   page: number;
@@ -25,19 +26,6 @@ export interface IAuthorsPageAbstractionProps {
   asc: boolean;
 }
 
-const authorsFetcher = async (url: string) => {
-  const res = await fetch(url);
-
-  if (!res.ok) {
-    const error: any = new Error("An error occurred while fetching the data.");
-    // Attach extra info to the error object.
-    error.info = await res.json();
-    error.status = res.status;
-    throw error;
-  }
-  return res.json();
-};
-
 function useAuthors(
   page: number | undefined,
   size: number | undefined,
@@ -46,7 +34,7 @@ function useAuthors(
 ) {
   const { data, error } = useSWR(
     `/api/store/authors?page=${page}&size=${size}&sortBy=${sortBy}&asc=${asc}`,
-    authorsFetcher
+    fetcher
   );
 
   return {

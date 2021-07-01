@@ -1,5 +1,6 @@
 .activeLink,
-.navbarLink {
+.navbarLink,
+.menuButton {
   display: block;
   position: relative;
   text-align: center;
@@ -7,7 +8,8 @@
 }
 
 /* Fade in */
-.navbarLink::after {
+.navbarLink::after,
+.menuButton::after {
   content: "";
   position: absolute;
   bottom: 0;
@@ -20,7 +22,8 @@
 }
 
 .navbarLink:hover::after,
-.navbarLink:focus::after {
+.navbarLink:focus::after,
+.menuButton:hover::after {
   opacity: 1;
   transform: translateY(0.2em);
 }

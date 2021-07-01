@@ -88,10 +88,8 @@ public class Book {
         this.title = book.title;
         this.description = book.description;
         this.coverArtURL = book.coverArtURL;
-
         this.price = book.price;
         this.yearOfRelease = book.yearOfRelease;
-
         this.forSale = book.forSale;
 
     }
