@@ -56,6 +56,7 @@ export default function DeleteBookModal({
           <Text>
             Are you sure you want to delete "{title}", ID: {id} ?
           </Text>
+          {error}
         </ModalBody>
 
         <ModalFooter>

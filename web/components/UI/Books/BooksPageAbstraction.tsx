@@ -6,7 +6,7 @@ import {
   useBreakpointValue,
   Box,
 } from "@chakra-ui/react";
-import { useRouter } from "next/router";
+import { NextRouter } from "next/router";
 import React from "react";
 import useSWR from "swr";
 import {
@@ -20,10 +20,10 @@ import { fetcher } from "../../../lib/fetcher";
 
 export interface IBooksPageAbstractionProps {
   page: number;
-  setPage: React.Dispatch<React.SetStateAction<number>>;
   size: number;
   sortBy: string;
   asc: boolean;
+  router: NextRouter;
 }
 
 function useBooks(
@@ -49,7 +49,7 @@ export default function BooksPageAbstraction({
   page,
   size,
   sortBy,
-  setPage,
+  router,
 }: IBooksPageAbstractionProps) {
   const slidesPerViewCount = useBreakpointValue({
     base: 1,
@@ -58,13 +58,10 @@ export default function BooksPageAbstraction({
     lg: 4,
   });
 
-  const router = useRouter();
-
   const { data, error, isLoading } = useBooks(page, size, sortBy, asc);
 
   const handlePaginationButtonClick = (pageIndex: number) => {
-    setPage(pageIndex);
-    router.replace("/books");
+    router.push(`/books?page=${pageIndex}&sortBy=${sortBy}&asc=${asc}`);
   };
 
   if (isLoading)

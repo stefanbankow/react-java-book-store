@@ -39,7 +39,7 @@ export default function BookSortByMenu({
             onClick={() => handleSortButtonClick("id")}
             value="id"
           >
-            Date added
+            Latest
           </MenuItemOption>
           <MenuItemOption
             onClick={() => handleSortButtonClick("price")}

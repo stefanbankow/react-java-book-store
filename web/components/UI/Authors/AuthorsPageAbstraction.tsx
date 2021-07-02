@@ -6,7 +6,7 @@ import {
   useBreakpointValue,
   Box,
 } from "@chakra-ui/react";
-import { useRouter } from "next/router";
+import { NextRouter } from "next/router";
 import React from "react";
 import useSWR from "swr";
 import ErrorMessage from "../ErrorMessage";
@@ -20,10 +20,10 @@ import { fetcher } from "../../../lib/fetcher";
 
 export interface IAuthorsPageAbstractionProps {
   page: number;
-  setPage: React.Dispatch<React.SetStateAction<number>>;
   size: number;
   sortBy: string;
   asc: boolean;
+  router: NextRouter;
 }
 
 function useAuthors(
@@ -49,7 +49,7 @@ export default function AuthorsPageAbstraction({
   page,
   size,
   sortBy,
-  setPage,
+  router,
 }: IAuthorsPageAbstractionProps) {
   const slidesPerViewCount = useBreakpointValue({
     base: 1,
@@ -57,14 +57,10 @@ export default function AuthorsPageAbstraction({
     md: 3,
     lg: 4,
   });
-
   const { data, error, isLoading } = useAuthors(page, size, sortBy, asc);
 
-  const router = useRouter();
-
   const handlePaginationButtonClick = (pageIndex: number) => {
-    setPage(pageIndex);
-    router.replace("/authors");
+    router.push(`/authors?page=${pageIndex}&sortBy=${sortBy}&asc=${asc}`);
   };
 
   if (isLoading)
