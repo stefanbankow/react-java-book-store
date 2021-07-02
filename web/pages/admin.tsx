@@ -14,7 +14,7 @@ import {
   Tabs,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import * as React from "react";
+import React, { useState } from "react";
 import useSWR from "swr";
 import BooksAdminPanel from "../components/UI/Admin/Books/BooksAdminPanel";
 import ErrorMessage from "../components/UI/ErrorMessage";
@@ -32,9 +32,16 @@ export const useUserWithRole = () => {
 };
 
 export default function AdminPage() {
-  const { data, error, isLoading } = useUserWithRole();
   const router = useRouter();
+
+  const [tabIndex, setTabIndex] = useState(0);
+
+  const { data, error, isLoading } = useUserWithRole();
   let pageData;
+
+  const handleTabChange = (index: number) => {
+    setTabIndex(index);
+  };
 
   if (isLoading) {
     pageData = (
@@ -68,7 +75,13 @@ export default function AdminPage() {
           <Heading textAlign={{ base: "center", md: "left" }} my="10">
             Admin Dashoard
           </Heading>
-          <Tabs isLazy={true} variant="enclosed" colorScheme="gray">
+          <Tabs
+            index={tabIndex}
+            onChange={handleTabChange}
+            isLazy={true}
+            variant="enclosed"
+            colorScheme="gray"
+          >
             <TabList>
               <Tab>Orders</Tab>
               <Tab>Books</Tab>

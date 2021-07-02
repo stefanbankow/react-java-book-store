@@ -4,10 +4,8 @@ import {
   Text,
   Image,
   AspectRatio,
-  Container,
   Button,
   Collapse,
-  Box,
   Icon,
   IconButton,
   Menu,
@@ -44,9 +42,9 @@ export default function AdminDesktopBookCard({
       mx="auto"
       my="5"
       justifyContent="center"
-      spacing={10}
       textAlign="center"
       px="5"
+      spacing={5}
     >
       <Text w="5%">{book.id}</Text>
       <Text w="15%">{book.title}</Text>
@@ -72,7 +70,7 @@ export default function AdminDesktopBookCard({
       </Flex>
       <Text w="10%">{book.yearOfRelease || "Unknown"}</Text>
 
-      <AspectRatio minW="10%" ratio={0.68}>
+      <AspectRatio w="10%" ratio={0.68}>
         <Image src={book.coverArtURL} />
       </AspectRatio>
       <Text w="10%">{book.author?.name}</Text>

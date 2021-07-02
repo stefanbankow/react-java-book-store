@@ -1,9 +1,10 @@
 import { Button, Icon } from "@chakra-ui/react";
+import { useRouter } from "next/router";
 import React from "react";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 export interface IAdminBookPanelButtonProps {
-  text: string;
+  children: React.ReactNode;
   type: string;
   width: string;
   sortByValue?: string;
@@ -13,7 +14,7 @@ export interface IAdminBookPanelButtonProps {
 }
 
 export default function AdminBookPanelButton({
-  text,
+  children,
   type,
   width,
   sortByValue,
@@ -21,24 +22,28 @@ export default function AdminBookPanelButton({
   ascValue,
   setAsc,
 }: IAdminBookPanelButtonProps) {
-  const handleSortButtonClick = (value: string) => {
-    if (setSortBy && setAsc)
-      if (sortByValue == value) {
+  const router = useRouter();
+  const handleSortButtonClick = () => {
+    if (setSortBy && setAsc) {
+      router.push("/admin?page=0");
+      if (sortByValue === type) {
         setAsc((prev) => !prev);
       } else {
-        setSortBy(value);
+        setSortBy(type);
         setAsc(false);
       }
+    }
   };
   return (
     <Button
       variant="link"
-      onClick={() => handleSortButtonClick(type)}
+      isActive={sortByValue === type}
+      onClick={handleSortButtonClick}
       whiteSpace="normal"
-      as="button"
-      minW={width}
+      h="50px"
+      w={width}
     >
-      {text}{" "}
+      {children}
       {sortByValue === type &&
         (ascValue ? <Icon as={FiChevronUp} /> : <Icon as={FiChevronDown} />)}
     </Button>

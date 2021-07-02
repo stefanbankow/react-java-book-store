@@ -10,13 +10,13 @@ import {
   Text,
 } from "@chakra-ui/react";
 import React from "react";
-import { mutate } from "swr";
 
 export interface IDeleteBookModalProps {
   id: number;
   title: string;
   isOpen: boolean;
   onClose: () => void;
+  updateData: () => void;
 }
 
 export default function DeleteBookModal({
@@ -24,6 +24,7 @@ export default function DeleteBookModal({
   title,
   isOpen,
   onClose,
+  updateData,
 }: IDeleteBookModalProps) {
   let error;
   const handleDeleteBook = async () => {
@@ -32,6 +33,7 @@ export default function DeleteBookModal({
     });
     if (res.status === 204) {
       onClose();
+      updateData();
     } else {
       error = (
         <>

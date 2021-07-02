@@ -44,8 +44,7 @@ export default async function getBooks(
         const book = await response.json();
         res.status(response.status || 200).json(book);
       } catch (error) {
-        console.error(error.message);
-        res.status(error.status || 500).json(error);
+        res.status(error.status || 500).json({ error: error.message });
       }
       break;
     case "DELETE":

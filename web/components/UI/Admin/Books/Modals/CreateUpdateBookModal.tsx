@@ -13,7 +13,7 @@ import {
   Box,
 } from "@chakra-ui/react";
 import { Field, FieldProps, Form, Formik, FormikHelpers } from "formik";
-import React from "react";
+import React, { useState } from "react";
 import { BookProps } from "../../../../../types/BookTypes";
 import ChakraFormikFormField from "../../../Forms/ChakraFormikFormField";
 import ChakraFormikNumberInput from "../../../Forms/ChakraFormikNumberInput";
@@ -24,6 +24,7 @@ export interface ICreateOrUpdateBookModalProps {
   onClose: () => void;
   type: "create" | "update";
   currentBook: BookProps | null;
+  updateData: () => void;
 }
 
 export default function CreateOrUpdateBookModal({
@@ -31,7 +32,9 @@ export default function CreateOrUpdateBookModal({
   onClose,
   type,
   currentBook,
+  updateData,
 }: ICreateOrUpdateBookModalProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const initialValues =
     type == "create"
       ? {
@@ -53,77 +56,51 @@ export default function CreateOrUpdateBookModal({
           authorId: currentBook?.author.id,
         };
 
-  let errorMessage: React.ReactElement | null = null;
-
-  const handleCreateBookSubmit = async (
+  const handleBookSubmit = async (
     values: typeof initialValues,
-    actions: FormikHelpers<typeof initialValues>
+    actions: FormikHelpers<typeof initialValues>,
+    requestType: "POST" | "PATCH"
   ) => {
     try {
-      const response = await fetch("http://localhost:3000/api/store/books", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
-      if (response.status < 200 || response.status > 299) {
+      const response = await fetch(
+        requestType === "POST"
+          ? "http://localhost:3000/api/store/books"
+          : `http://localhost:3000/api/store/books/${currentBook?.id}`,
+        {
+          method: requestType,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+        }
+      );
+      if (response.ok || response.status === 204) {
+        updateData();
+        onClose();
+      } else if (response.status === 400) {
         const data = await response.json();
-        console.log(data);
         actions.setErrors(data);
       } else {
-        onClose();
+        const data = await response.json();
+        actions.setStatus({ error: data.error });
       }
     } catch (error) {
-      errorMessage = (
-        <>
-          <Text>There was an error while attempting to create the book</Text>
-        </>
-      );
+      actions.setStatus();
     }
   };
 
-  const handleUpdateBookSubmit = async (
-    values: typeof initialValues,
-    actions: FormikHelpers<typeof initialValues>
-  ) => {
-    if (currentBook)
-      try {
-        const response = await fetch(
-          `http://localhost:3000/api/store/books/${currentBook.id}`,
-          {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(values),
-          }
-        );
-        if (response.status < 200 || response.status > 299) {
-          const data = await response.json();
-          console.log(data);
-          actions.setErrors(data);
-        } else {
-          onClose();
-        }
-      } catch (error) {
-        errorMessage = (
-          <>
-            <Text>There was an error while attempting to update the book</Text>
-          </>
-        );
-      }
-    else {
-      errorMessage = <Text>There is no book to update</Text>;
-    }
-  };
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <Formik
         initialValues={initialValues}
         onSubmit={async (values, actions) => {
+          setIsLoading(true);
           type === "create"
-            ? handleCreateBookSubmit(values, actions)
-            : handleUpdateBookSubmit(values, actions);
+            ? await handleBookSubmit(values, actions, "POST")
+            : await handleBookSubmit(values, actions, "PATCH");
+
+          setIsLoading(false);
         }}
       >
-        {(props) => (
+        {({ status }) => (
           <Form>
             <ModalOverlay />
             <ModalContent>
@@ -167,6 +144,7 @@ export default function CreateOrUpdateBookModal({
                     max={2025}
                     step={1}
                   />
+
                   <ChakraFormikFormField
                     isRequired
                     fieldName="coverArtURL"
@@ -179,17 +157,33 @@ export default function CreateOrUpdateBookModal({
                     min={1}
                     step={1}
                   />
+                  {status && (
+                    <Box textAlign="center" w="100%">
+                      <Text align="center" mx="auto" color="red">
+                        {status.error}
+                      </Text>
+                    </Box>
+                  )}
                 </VStack>
-                <Box mx="auto">{errorMessage}</Box>
               </ModalBody>
 
               <ModalFooter>
                 {type === "create" ? (
-                  <Button colorScheme="green" mr={3} type="submit">
+                  <Button
+                    isLoading={isLoading}
+                    colorScheme="green"
+                    mr={3}
+                    type="submit"
+                  >
                     Create
                   </Button>
                 ) : (
-                  <Button colorScheme="blue" mr={3} type="submit">
+                  <Button
+                    isLoading={isLoading}
+                    colorScheme="blue"
+                    mr={3}
+                    type="submit"
+                  >
                     Update
                   </Button>
                 )}

@@ -10,11 +10,11 @@ import {
   InputLeftElement,
   Spacer,
   Spinner,
-  Text,
   useDisclosure,
 } from "@chakra-ui/react";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
-import { FiChevronDown, FiPlus, FiSearch } from "react-icons/fi";
+import { FiPlus, FiSearch } from "react-icons/fi";
 import useSWR from "swr";
 import { fetcher } from "../../../../lib/fetcher";
 import {
@@ -22,21 +22,25 @@ import {
   PaginatedBooksResponseProps,
 } from "../../../../types/BookTypes";
 import ErrorMessage from "../../ErrorMessage";
-import AdminBookPanelButton from "./AdminBookPanelButton";
+import AdminBooksTableHead from "./AdminBooksTableHead";
 import AdminDesktopBookCard from "./AdminDesktopBookCard";
 import CreateBookModal from "./Modals/CreateUpdateBookModal";
 import DeleteBookModal from "./Modals/DeleteBookModal";
+import { ParsedUrlQuery } from "querystring";
+import PaginationButtonsWrapper from "../../Buttons/Pagination/PaginationButtonsWrapper";
 
 export interface IBooksAdminPanelProps {}
 
 const useBooksAdmin = (
-  page: number | undefined,
-  size: number | undefined,
+  query: ParsedUrlQuery,
+  pageSize: number | undefined,
   sortBy: string | undefined,
   asc: boolean | undefined
 ) => {
-  const { data, error } = useSWR(
-    `/api/store/books?page=${page}&size=${size}&sortBy=${sortBy}&asc=${asc}`,
+  const { data, error, mutate, isValidating } = useSWR(
+    `/api/store/books?page=${parseInt(
+      (query.page as string) || "0"
+    )}&size=${pageSize}&sortBy=${sortBy}&asc=${asc}`,
     fetcher
   );
 
@@ -44,16 +48,26 @@ const useBooksAdmin = (
     data: data as PaginatedBooksResponseProps,
     isLoading: !error && !data,
     error,
+    mutate,
+
+    isValidating,
   };
 };
 
 export default function BooksAdminPanel({}: IBooksAdminPanelProps) {
   //Pagination
-  const [page, setPage] = useState(0);
-  const [size] = useState(50);
+  const router = useRouter();
+
+  const [pageSize] = useState(24);
   const [sortBy, setSortBy] = useState("id");
   const [asc, setAsc] = useState(false);
-  const { data, error, isLoading } = useBooksAdmin(page, size, sortBy, asc);
+
+  const { data, error, isLoading, isValidating, mutate } = useBooksAdmin(
+    router.query,
+    pageSize,
+    sortBy,
+    asc
+  );
 
   //Modals
   const [modalType, setModalType] = useState<"create" | "update">("create"); //Used by the CreateOrUpdateBookModal to have different functionality depending on which button is pressed
@@ -87,7 +101,7 @@ export default function BooksAdminPanel({}: IBooksAdminPanelProps) {
     );
   else
     return (
-      <Box overflowX="auto">
+      <Box>
         <HStack m="5" direction="row">
           <InputGroup>
             <InputLeftElement
@@ -106,38 +120,31 @@ export default function BooksAdminPanel({}: IBooksAdminPanelProps) {
             colorScheme="green"
             leftIcon={<Icon as={FiPlus} />}
           >
-            Add new book
+            Add a book
+          </Button>
+          <Button
+            size="lg"
+            isLoading={isValidating}
+            onClick={() => {
+              mutate();
+            }}
+          >
+            Refresh
           </Button>
         </HStack>
-
         <CreateBookModal
           isOpen={createOrUpdateBookModalState.isOpen}
           onClose={createOrUpdateBookModalState.onClose}
           type={modalType}
           currentBook={currentBook}
+          updateData={mutate}
         />
-
-        <HStack
-          w="98%"
-          position="relative"
-          mx="auto"
-          spacing={10}
-          textAlign="center"
-          justify="center"
-          px="5"
-        >
-          <AdminBookPanelButton text="ID" type="id" width="5%" />
-          <AdminBookPanelButton text="Title" type="title" width="15%" />
-          <Text w="20%">Description</Text>
-          <AdminBookPanelButton text="Price" type="price" width="5%" />
-          <Text w="5%">For Sale</Text>
-          <Text w="10%" rightIcon={<Icon as={FiChevronDown} />}>
-            Year of release
-          </Text>
-          <Text minW="10%">Image</Text>
-          <Text w="10%">Author Name</Text>
-          <Box w="5%" />
-        </HStack>
+        <AdminBooksTableHead
+          sortByState={sortBy}
+          setSortBy={setSortBy}
+          ascState={asc}
+          setAsc={setAsc}
+        />
         {data?.content.map((book) => (
           <AdminDesktopBookCard
             key={`book-${book.id}`}
@@ -150,12 +157,20 @@ export default function BooksAdminPanel({}: IBooksAdminPanelProps) {
             handleDeleteModalOpen={deleteBookModalState.onOpen}
           />
         ))}
+        <PaginationButtonsWrapper
+          data={data}
+          page={parseInt((router.query.page as string) || "0")}
+          handlePaginationButtonClick={(page: number) =>
+            router.push(`/admin?page=${page}`)
+          }
+        />
         {currentBook && (
           <DeleteBookModal
             id={currentBook.id}
             title={currentBook.title}
             isOpen={deleteBookModalState.isOpen}
             onClose={deleteBookModalState.onClose}
+            updateData={mutate}
           />
         )}
       </Box>

@@ -40,6 +40,7 @@ export default function ChakraFormikNumberInput({
           <FormLabel htmlFor={fieldName}>{label}</FormLabel>
           <NumberInput
             {...field}
+            value={field.value || 0}
             onChange={(val) => {
               form.setFieldValue(field.name, val);
               form.setFieldTouched(field.name, true);
