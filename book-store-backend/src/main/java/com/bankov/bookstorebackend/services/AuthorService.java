@@ -1,6 +1,8 @@
 package com.bankov.bookstorebackend.services;
 
 import com.bankov.bookstorebackend.models.Author;
+import com.bankov.bookstorebackend.models.Book;
+import com.bankov.bookstorebackend.repositories.AuthorRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -14,19 +16,29 @@ import java.util.Optional;
 
 @Service
 public class AuthorService {
-    PagingAndSortingRepository<Author, Long> repository;
+    AuthorRepository repository;
 
-    public AuthorService(PagingAndSortingRepository<Author, Long> repository) {
+    public AuthorService(AuthorRepository repository) {
         this.repository = repository;
     }
 
     public Page<Author> findPaginated(int page, int size, String sortBy, boolean ascending) {
-        if(ascending) {
+        if (ascending) {
             return repository.findAll(PageRequest.of(page, size, Sort.by(sortBy).ascending()));
-        }
-        else {
+        } else {
             return repository.findAll(PageRequest.of(page, size, Sort.by(sortBy).descending()));
         }
+    }
+
+    public Page<Author> searchPaginated(String query, int page, int size, String sortBy, boolean ascending) {
+        if (ascending) {
+            return repository.findAllByNameContainsIgnoreCase(
+                    query, PageRequest.of(page, size, Sort.by(sortBy).ascending()));
+        } else {
+            return repository.findAllByNameContainsIgnoreCase(
+                    query, PageRequest.of(page, size, Sort.by(sortBy).descending()));
+        }
+
     }
 
     public Optional<Author> findById(Long id) {

@@ -1,51 +1,58 @@
 import { Button, Icon } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import React from "react";
+
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 export interface IAdminBookPanelButtonProps {
-  children: React.ReactNode;
   type: string;
   width: string;
-  sortByValue?: string;
-  setSortBy?: React.Dispatch<React.SetStateAction<string>>;
-  ascValue?: boolean;
-  setAsc?: React.Dispatch<React.SetStateAction<boolean>>;
+  children: React.ReactNode;
 }
 
 export default function AdminBookPanelButton({
-  children,
   type,
   width,
-  sortByValue,
-  setSortBy,
-  ascValue,
-  setAsc,
+  children,
 }: IAdminBookPanelButtonProps) {
   const router = useRouter();
   const handleSortButtonClick = () => {
-    if (setSortBy && setAsc) {
-      router.push("/admin?page=0");
-      if (sortByValue === type) {
-        setAsc((prev) => !prev);
-      } else {
-        setSortBy(type);
-        setAsc(false);
-      }
+    const query = router.query;
+
+    if ((query.sortBy || "id") === type) {
+      router.push(
+        router.asPath.split("?")[0] +
+          `?search=${query.search || ""}&page=0&size=${
+            query.size || 24
+          }&sortBy=${query.sortBy || "id"}&asc=${!Boolean(
+            query.asc === "true" || false
+          )}`
+      );
+    } else {
+      router.push(
+        router.asPath.split("?")[0] +
+          `?search=${query.search || ""}&page=0&size=${
+            query.size || 24
+          }&sortBy=${type}&asc=${query.asc || false}`
+      );
     }
   };
+
   return (
     <Button
       variant="link"
-      isActive={sortByValue === type}
+      isActive={(router.query.sortBy || "id") === type}
       onClick={handleSortButtonClick}
       whiteSpace="normal"
       h="50px"
       w={width}
     >
       {children}
-      {sortByValue === type &&
-        (ascValue ? <Icon as={FiChevronUp} /> : <Icon as={FiChevronDown} />)}
+      {(router.query.sortBy || "id") === type &&
+        (router.query.asc === "true" ? (
+          <Icon as={FiChevronUp} />
+        ) : (
+          <Icon as={FiChevronDown} />
+        ))}
     </Button>
   );
 }

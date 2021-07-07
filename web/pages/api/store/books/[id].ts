@@ -68,7 +68,7 @@ export default async function getBooks(
         return res.status(response.status || 200).json(response);
       } catch (error) {
         console.error({ ...error });
-        return res.status(error.status || 500).json(error);
+        res.status(error.status || 500).json({ error: error.message });
       }
       break;
     default:

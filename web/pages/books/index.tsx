@@ -1,28 +1,32 @@
 import {
   Box,
+  Center,
   Container,
   Fade,
   Heading,
   HStack,
-  Icon,
-  Input,
-  InputGroup,
-  InputLeftElement,
+  Spinner,
   Text,
 } from "@chakra-ui/react";
-import React from "react";
-import { FiSearch } from "react-icons/fi";
+import React, { useState } from "react";
+
 import SortByMenu from "../../components/UI/Books/SortByMenu";
-import BookPageAbstraction from "../../components/UI/Books/BooksPageAbstraction";
 import { useRouter } from "next/router";
+import SearchInput from "../../components/UI/Forms/SearchInput";
+import CardPageAbstraction from "../../components/UI/CardPageAbstraction";
 
 export default function BooksPage({}) {
   const router = useRouter();
 
+  const [isTyping, setIsTyping] = useState(false);
+
   //These use shallow pushing since the user is already at the top of the page
   const handleSortButtonClick = (value: string) => {
     router.push(
-      `/books?page=0&sortBy=${value}&asc=${router.query.asc || "false"}`,
+      router.pathname +
+        `?search=${router.query.search || ""}&page=0&sortBy=${value}&asc=${
+          router.query.asc || "false"
+        }`,
       undefined,
       { shallow: true }
     );
@@ -30,7 +34,10 @@ export default function BooksPage({}) {
 
   const handleAscButtonClick = (value: boolean) => {
     router.push(
-      `/books?page=0&sortBy=${router.query.sortBy || "id"}&asc=${value}`,
+      router.pathname +
+        `?search=${router.query.search || ""}&page=0&sortBy=${
+          router.query.sortBy || "id"
+        }&asc=${value}`,
       undefined,
       { shallow: true }
     );
@@ -56,33 +63,38 @@ export default function BooksPage({}) {
             handleAscButtonClick={handleAscButtonClick}
           />
 
-          <InputGroup>
-            <InputLeftElement
-              pointerEvents="none"
-              children={<Icon as={FiSearch} />}
-            />
-            <Input placeholder="Book name, Author name, etc." />
-          </InputGroup>
-        </HStack>
-
-        <BookPageAbstraction
-          page={parseInt((router.query.page as string) || "0")}
-          sortBy={(router.query.sortBy as string) || "id"}
-          asc={Boolean(router.query.asc === "true" || false)}
-          size={24}
-          router={router}
-        />
-
-        {/*Used to pre-render the next page*/}
-        <div style={{ display: "none" }}>
-          <BookPageAbstraction
-            page={parseInt((router.query.page as string) || "0") + 1}
-            sortBy={(router.query.sortBy as string) || "id"}
-            asc={Boolean(router.query.asc === "true" || false)}
-            size={24}
-            router={router}
+          <SearchInput
+            placeholder="Title, Author name, etc."
+            setIsTyping={setIsTyping}
           />
-        </div>
+        </HStack>
+        {isTyping ? (
+          <Center w="100%" h="50vh">
+            <Spinner size="xl" />
+          </Center>
+        ) : (
+          <>
+            <CardPageAbstraction
+              type="books"
+              page={router.query.page}
+              sortBy={router.query.sortBy}
+              asc={router.query.asc}
+              size={"24"}
+              search={router.query.search || ""}
+            />
+            {/*Used to pre-render the next page*/}
+            <div style={{ display: "none" }}>
+              <CardPageAbstraction
+                type="books"
+                page={router.query.page}
+                sortBy={router.query.sortBy}
+                asc={router.query.asc}
+                size={"24"}
+                search={router.query.search || ""}
+              />
+            </div>
+          </>
+        )}
       </Fade>
     </Box>
   );

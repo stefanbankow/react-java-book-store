@@ -11,10 +11,11 @@ import HomePageLink from "../HomePageLink";
 import NavbarLink from "./NavbarLink";
 import MyDivider from "../../Divider";
 import { useAppSelector } from "../../../../redux/hooks";
-import { useUserWithRole } from "../../../../pages/admin";
+
 import UserMenu from "./UserMenu";
 
 import styles from "../../../../styles/AnimatedUnderlineLink.module.css";
+import { useUserWithRole } from "../../../../lib/swrHooks";
 
 export interface IDesktopNavbarProps {
   cartStatus: UseDisclosureProps;

@@ -83,7 +83,7 @@ export default function CreateOrUpdateBookModal({
         actions.setStatus({ error: data.error });
       }
     } catch (error) {
-      actions.setStatus();
+      actions.setStatus({ error: error.message });
     }
   };
 

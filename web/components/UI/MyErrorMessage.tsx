@@ -1,17 +1,17 @@
 import { Text } from "@chakra-ui/react";
 import React from "react";
 
-export interface IErrorMessageProps {
+export interface IMyErrorMessageProps {
   status: number;
   message: string;
   reason?: string;
 }
 
-export default function ErrorMessage({
+export default function MyErrorMessage({
   status,
   message,
   reason,
-}: IErrorMessageProps) {
+}: IMyErrorMessageProps) {
   let informationText;
 
   switch (status) {

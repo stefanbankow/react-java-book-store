@@ -25,16 +25,15 @@ public class AuthorController {
 
     @GetMapping
     public ResponseEntity<Page<Author>> getAuthorsPaginated(@RequestParam(required = false, defaultValue = "0") int page,
-                                                            @RequestParam(required = false, defaultValue = "10") int size,
+                                                            @RequestParam(required = false, defaultValue = "24") int size,
                                                             @RequestParam(required = false, defaultValue = "id") String sortBy,
-                                                            @RequestParam(required = false, defaultValue = "false") boolean asc) {
+                                                            @RequestParam(required = false, defaultValue = "false") boolean asc,
+                                                            @RequestParam(required = false, defaultValue = "") String search) {
         Page<Author> authors;
-        if (sortBy.equals("name") || sortBy.equals("yearBorn")) {
+        if (!search.equals("")) authors = service.searchPaginated(search, page, size, sortBy, asc);
+        else
             authors = service.findPaginated(page, size, sortBy, asc);
 
-        } else {
-            authors = service.findPaginated(page, size, "id", asc);
-        }
         return ResponseEntity.ok().body(authors);
     }
 

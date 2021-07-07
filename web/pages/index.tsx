@@ -24,7 +24,7 @@ import Link from "next/link";
 
 //Components
 import LatestBooksCarousel from "../components/UI/Books/LatestBooksCarousel";
-import ErrorMessage from "../components/UI/ErrorMessage";
+import MyErrorMessage from "../components/UI/MyErrorMessage";
 
 //PropTypes
 import { PaginatedBooksResponseProps } from "../types/BookTypes";
@@ -135,7 +135,7 @@ export default function Home({
                     w="90%"
                     h="70vh"
                   >
-                    <ErrorMessage
+                    <MyErrorMessage
                       status={status}
                       message="There was an error when attempting to retrieve book data, we're sorry for the inconvenience"
                     />
@@ -148,7 +148,7 @@ export default function Home({
                     w="90%"
                     h="70vh"
                   >
-                    <ErrorMessage
+                    <MyErrorMessage
                       status={status}
                       message="There are no books available at this time, check back later!"
                     />

@@ -11,22 +11,13 @@ import {
 import React from "react";
 import Link from "next/link";
 import { FiUser } from "react-icons/fi";
+import { AuthorProps } from "../../../types/AuthorTypes";
 
 export interface IAuthorProps {
-  id: number;
-  name: string;
-  description?: string;
-  imageURL?: string;
-  yearBorn: number;
-  yearOfDeath?: number;
+  author: AuthorProps;
 }
 
-export default function AuthorCard({
-  id,
-  name,
-  yearBorn,
-  imageURL,
-}: IAuthorProps) {
+export default function AuthorCard({ author }: IAuthorProps) {
   return (
     <Box py="5px">
       <Flex
@@ -42,7 +33,7 @@ export default function AuthorCard({
           transition: "0.2s ease",
         }}
       >
-        <Link href={`/authors/${id}`}>
+        <Link href={`/authors/${author.id}`}>
           <Box
             w="100%"
             h="100%"
@@ -53,7 +44,7 @@ export default function AuthorCard({
             }}
           >
             <AspectRatio m="10px auto" w="75%" ratio={0.68}>
-              <Image src={imageURL} fallback={<Icon as={FiUser} />} />
+              <Image src={author.imageURL} fallback={<Icon as={FiUser} />} />
             </AspectRatio>
             <Stack direction="column" mx="auto" w="100%" flex={1}>
               <Center mx="3" flexDir="column" textAlign="center">
@@ -63,13 +54,13 @@ export default function AuthorCard({
                   fontSize={["md", "md", "md", "md", "md", "lg"]}
                   minH="3em"
                 >
-                  {name}
+                  {author.name}
                 </Text>
                 <Text
                   noOfLines={1}
                   fontSize={["sn", "sm", "sm", "sm", "sm", "md"]}
                 >
-                  {yearBorn}
+                  {author.yearBorn}
                 </Text>
               </Center>
             </Stack>

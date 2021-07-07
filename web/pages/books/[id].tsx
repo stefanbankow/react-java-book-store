@@ -19,7 +19,7 @@ import {
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import useSWR from "swr";
-import ErrorMessage from "../../components/UI/ErrorMessage";
+import MyErrorMessage from "../../components/UI/MyErrorMessage";
 import { BookProps } from "../../types/BookTypes";
 import { FiShoppingCart, FiHeart, FiBookOpen } from "react-icons/fi";
 import Link from "next/link";
@@ -66,7 +66,7 @@ export default function SingleBookPage() {
         w="90%"
         h="90vh"
       >
-        <ErrorMessage
+        <MyErrorMessage
           status={isError?.status}
           message={"There was an error while trying to fetch this resource"}
         />

@@ -1,46 +1,52 @@
-import { UserProfile } from "@auth0/nextjs-auth0";
 import {
+  Flex,
+  Center,
+  Spinner,
+  Heading,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
   Box,
   Fade,
   Container,
-  Heading,
-  Center,
-  Flex,
-  Spinner,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
-import useSWR from "swr";
-import BooksAdminPanel from "../components/UI/Admin/Books/BooksAdminPanel";
-import ErrorMessage from "../components/UI/ErrorMessage";
-import { fetcher } from "../lib/fetcher";
+import React, { useEffect, useState } from "react";
+import BooksAdminPanel from "../../components/UI/Admin/Books/BooksAdminPanel";
+import MyErrorMessage from "../../components/UI/MyErrorMessage";
+import { useUserWithRole } from "../../lib/swrHooks";
 
-export interface IAdminPageProps {}
+export interface IAdminTabProps {}
 
-export const useUserWithRole = () => {
-  const { data, error } = useSWR("/api/auth/user", fetcher);
-  return {
-    data: data as { user: UserProfile; isAdmin: boolean },
-    error,
-    isLoading: !data && !error,
-  };
-};
-
-export default function AdminPage() {
+export default function AdminTab({}: IAdminTabProps) {
+  const tabNames = ["orders", "books", "authors"];
   const router = useRouter();
 
   const [tabIndex, setTabIndex] = useState(0);
+
+  useEffect(() => {
+    switch (router.query.adminTab && router.query.adminTab[0]) {
+      case "orders":
+        setTabIndex(0);
+        break;
+      case "books":
+        setTabIndex(1);
+        break;
+      case "authors":
+        setTabIndex(2);
+        break;
+      default:
+        break;
+    }
+  }, [router.query.adminTab]);
 
   const { data, error, isLoading } = useUserWithRole();
   let pageData;
 
   const handleTabChange = (index: number) => {
-    setTabIndex(index);
+    router.push("/admin/" + tabNames[index]);
   };
 
   if (isLoading) {
@@ -62,7 +68,7 @@ export default function AdminPage() {
         w="90%"
         h="80vh"
       >
-        <ErrorMessage
+        <MyErrorMessage
           status={error.status}
           message="There was an error when trying to verify your user role!"
         />

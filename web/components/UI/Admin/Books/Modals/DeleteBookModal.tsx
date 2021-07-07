@@ -8,8 +8,9 @@ import {
   ModalFooter,
   Button,
   Text,
+  Box,
 } from "@chakra-ui/react";
-import React from "react";
+import React, { useState } from "react";
 
 export interface IDeleteBookModalProps {
   id: number;
@@ -26,7 +27,10 @@ export default function DeleteBookModal({
   onClose,
   updateData,
 }: IDeleteBookModalProps) {
-  let error;
+  const [error, setError] = useState<
+    { message: string; status: number } | undefined
+  >(undefined);
+
   const handleDeleteBook = async () => {
     const res = await fetch(`http://localhost:3000/api/store/books/${id}`, {
       method: "DELETE",
@@ -35,15 +39,10 @@ export default function DeleteBookModal({
       onClose();
       updateData();
     } else {
-      error = (
-        <>
-          <Text color="red.300">
-            There was an error while attempting to delete this book, please try
-            again later!
-          </Text>
-          <Text>Status: {res.status}</Text>
-        </>
-      );
+      res
+        .json()
+        .then((data) => setError({ message: data.error, status: res.status }))
+        .catch((err) => setError({ message: err.message, status: res.status }));
     }
   };
   return (
@@ -56,7 +55,14 @@ export default function DeleteBookModal({
           <Text>
             Are you sure you want to delete "{title}", ID: {id} ?
           </Text>
-          {error}
+          {error && (
+            <Box mx="auto" my="5" textAlign="center">
+              <Text mb={2} color="red">
+                {error.message}
+              </Text>
+              <Text color="red">Status: {error.status}</Text>
+            </Box>
+          )}
         </ModalBody>
 
         <ModalFooter>

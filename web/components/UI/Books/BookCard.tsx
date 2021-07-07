@@ -113,7 +113,7 @@ export default function LatestBookCard({ book }: BookCardProps) {
             onClick={() => {
               dispatch(addItem(book));
               toast({
-                title: `Added "${book.title}" to cart`,
+                title: `Added ${book.title} to cart`,
                 duration: 1500,
                 isClosable: true,
                 position: "top-right",

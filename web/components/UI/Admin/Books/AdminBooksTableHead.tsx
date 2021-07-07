@@ -2,19 +2,9 @@ import { HStack, Box, Text } from "@chakra-ui/react";
 import * as React from "react";
 import AdminBookPanelButton from "./AdminBookPanelButton";
 
-export interface IAdminBooksTableHeadProps {
-  sortByState: string;
-  ascState: boolean;
-  setSortBy: React.Dispatch<React.SetStateAction<string>>;
-  setAsc: React.Dispatch<React.SetStateAction<boolean>>;
-}
+export interface IAdminBooksTableHeadProps {}
 
-export default function AdminBooksTableHead({
-  sortByState,
-  ascState,
-  setSortBy,
-  setAsc,
-}: IAdminBooksTableHeadProps) {
+export default function AdminBooksTableHead({}: IAdminBooksTableHeadProps) {
   return (
     <HStack
       w="98%"
@@ -26,40 +16,19 @@ export default function AdminBooksTableHead({
       px="5"
       spacing={5}
     >
-      <AdminBookPanelButton
-        type="id"
-        width="5%"
-        sortByValue={sortByState}
-        ascValue={ascState}
-        setSortBy={setSortBy}
-        setAsc={setAsc}
-      >
+      <AdminBookPanelButton type="id" width="5%">
         ID
       </AdminBookPanelButton>
-      <AdminBookPanelButton
-        type="title"
-        width="15%"
-        sortByValue={sortByState}
-        ascValue={ascState}
-        setSortBy={setSortBy}
-        setAsc={setAsc}
-      >
+      <AdminBookPanelButton type="title" width="15%">
         Title
       </AdminBookPanelButton>
       <AdminBookPanelButton type="description" width="20%">
         Description
       </AdminBookPanelButton>
-      <AdminBookPanelButton
-        type="price"
-        width="5%"
-        sortByValue={sortByState}
-        ascValue={ascState}
-        setSortBy={setSortBy}
-        setAsc={setAsc}
-      >
+      <AdminBookPanelButton type="price" width="5%">
         Price
       </AdminBookPanelButton>
-      <AdminBookPanelButton type="forSale" width="5%" sortByValue={sortByState}>
+      <AdminBookPanelButton type="forSale" width="5%">
         For Sale?
       </AdminBookPanelButton>
       <AdminBookPanelButton type="yearOfRelease" width="10%">

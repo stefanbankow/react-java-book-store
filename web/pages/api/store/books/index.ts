@@ -9,7 +9,11 @@ export default async function getBooks(
     case "GET":
       try {
         const response = await fetch(
-          `http://localhost:8080/api/store/books?page=${req.query.page}&size=${req.query.size}&sortBy=${req.query.sortBy}&asc=${req.query.asc}`
+          `http://localhost:8080/api/store/books?search=${
+            req.query.search || ""
+          }&page=${req.query.page}&size=${req.query.size}&sortBy=${
+            req.query.sortBy
+          }&asc=${req.query.asc}`
         );
         const books = await response.json();
         res.status(response.status || 200).json(books);

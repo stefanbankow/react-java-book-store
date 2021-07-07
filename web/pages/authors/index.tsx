@@ -1,29 +1,31 @@
 import {
   Box,
+  Center,
   Container,
   Fade,
   Heading,
   HStack,
-  Icon,
-  Input,
-  InputGroup,
-  InputLeftElement,
+  Spinner,
   Text,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import React from "react";
-
-import { FiSearch } from "react-icons/fi";
+import React, { useState } from "react";
 import AuthorSortByMenu from "../../components/UI/Authors/AuthorSortByMenu";
-import AuthorsPageAbstraction from "../../components/UI/Authors/AuthorsPageAbstraction";
+import CardPageAbstraction from "../../components/UI/CardPageAbstraction";
+import SearchInput from "../../components/UI/Forms/SearchInput";
 
 export interface IAuthorsPageProps {}
 
 export default function AuthorsPage() {
   const router = useRouter();
+  const [isTyping, setIsTyping] = useState(false);
+
   const handleSortButtonClick = (value: string) => {
     router.push(
-      `/authors?page=0&sortBy=${value}&asc=${router.query.asc || "false"}`,
+      router.pathname +
+        `?search=${router.query.search || ""}&page=0&sortBy=${value}&asc=${
+          router.query.asc || "false"
+        }`,
       undefined,
       { shallow: true }
     );
@@ -31,13 +33,15 @@ export default function AuthorsPage() {
 
   const handleAscButtonClick = (value: boolean) => {
     router.push(
-      `/authors?page=0&sortBy=${router.query.sortBy || "id"}&asc=${value}`,
+      router.pathname +
+        `?search=${router.query.search || ""}&page=0&sortBy=${
+          router.query.sortBy || "id"
+        }&asc=${value}`,
       undefined,
       { shallow: true }
     );
   };
 
-  console.log(process.env.AUTH0_AUDIENCE);
   return (
     <Box mx={{ base: "5", md: "10" }}>
       <Fade in transition={{ enter: { duration: 1 } }}>
@@ -57,31 +61,36 @@ export default function AuthorsPage() {
             handleSortButtonClick={handleSortButtonClick}
             handleAscButtonClick={handleAscButtonClick}
           />
-          <InputGroup my="10">
-            <InputLeftElement
-              pointerEvents="none"
-              children={<Icon as={FiSearch} />}
-            />
-            <Input placeholder="Book name, Author name, etc." />
-          </InputGroup>
+          <SearchInput placeholder="Search" setIsTyping={setIsTyping} />
         </HStack>
-
-        <AuthorsPageAbstraction
-          page={parseInt((router.query.page as string) || "0")}
-          sortBy={(router.query.sortBy as string) || "id"}
-          asc={Boolean(router.query.asc === "true" || false)}
-          size={24}
-          router={router}
-        />
-        <div style={{ display: "none" }}>
-          <AuthorsPageAbstraction
-            page={parseInt((router.query.page as string) || "0")}
-            sortBy={(router.query.sortBy as string) || "id"}
-            asc={Boolean(router.query.asc === "true" || false)}
-            size={24}
-            router={router}
-          />
-        </div>
+        {isTyping ? (
+          <Center w="100%" h="50vh">
+            <Spinner size="xl" />
+          </Center>
+        ) : (
+          <>
+            <CardPageAbstraction
+              type="authors"
+              page={router.query.page}
+              sortBy={router.query.sortBy}
+              asc={router.query.asc}
+              size={"24"}
+              search={router.query.search || ""}
+            />
+            <div style={{ display: "none" }}>
+              <CardPageAbstraction
+                type="authors"
+                page={(
+                  parseInt((router.query.page as string) || "0") + 1
+                ).toString()}
+                sortBy={router.query.sortBy}
+                asc={router.query.asc}
+                size={"24"}
+                search={router.query.search || ""}
+              />
+            </div>
+          </>
+        )}
       </Fade>
     </Box>
   );

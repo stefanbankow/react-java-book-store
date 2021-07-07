@@ -2,71 +2,40 @@ import {
   Box,
   Button,
   Center,
-  Flex,
   HStack,
   Icon,
-  Input,
-  InputGroup,
-  InputLeftElement,
   Spacer,
   Spinner,
   useDisclosure,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
-import { FiPlus, FiSearch } from "react-icons/fi";
-import useSWR from "swr";
-import { fetcher } from "../../../../lib/fetcher";
-import {
-  BookProps,
-  PaginatedBooksResponseProps,
-} from "../../../../types/BookTypes";
-import ErrorMessage from "../../ErrorMessage";
+import { FiPlus } from "react-icons/fi";
+import { BookProps } from "../../../../types/BookTypes";
+import MyErrorMessage from "../../MyErrorMessage";
 import AdminBooksTableHead from "./AdminBooksTableHead";
 import AdminDesktopBookCard from "./AdminDesktopBookCard";
 import CreateBookModal from "./Modals/CreateUpdateBookModal";
 import DeleteBookModal from "./Modals/DeleteBookModal";
-import { ParsedUrlQuery } from "querystring";
 import PaginationButtonsWrapper from "../../Buttons/Pagination/PaginationButtonsWrapper";
+import SearchInput from "../../Forms/SearchInput";
+import { useBooksAdmin } from "../../../../lib/swrHooks";
 
 export interface IBooksAdminPanelProps {}
-
-const useBooksAdmin = (
-  query: ParsedUrlQuery,
-  pageSize: number | undefined,
-  sortBy: string | undefined,
-  asc: boolean | undefined
-) => {
-  const { data, error, mutate, isValidating } = useSWR(
-    `/api/store/books?page=${parseInt(
-      (query.page as string) || "0"
-    )}&size=${pageSize}&sortBy=${sortBy}&asc=${asc}`,
-    fetcher
-  );
-
-  return {
-    data: data as PaginatedBooksResponseProps,
-    isLoading: !error && !data,
-    error,
-    mutate,
-
-    isValidating,
-  };
-};
 
 export default function BooksAdminPanel({}: IBooksAdminPanelProps) {
   //Pagination
   const router = useRouter();
 
-  const [pageSize] = useState(24);
-  const [sortBy, setSortBy] = useState("id");
-  const [asc, setAsc] = useState(false);
+  const [isTyping, setisTyping] = useState(false);
 
   const { data, error, isLoading, isValidating, mutate } = useBooksAdmin(
-    router.query,
-    pageSize,
-    sortBy,
-    asc
+    router.query.search,
+    router.query.page || "0",
+    router.query.size || "24",
+    router.query.sortBy || "id",
+    router.query.asc || "false",
+    isTyping
   );
 
   //Modals
@@ -75,15 +44,7 @@ export default function BooksAdminPanel({}: IBooksAdminPanelProps) {
   const createOrUpdateBookModalState = useDisclosure();
   const deleteBookModalState = useDisclosure();
 
-  if (isLoading)
-    return (
-      <Flex my="20" minH="80vh">
-        <Center my="auto" w="100%">
-          <Spinner size="xl" />
-        </Center>
-      </Flex>
-    );
-  else if (error)
+  if (error)
     return (
       <Center
         flexDir="column"
@@ -93,7 +54,7 @@ export default function BooksAdminPanel({}: IBooksAdminPanelProps) {
         w="90%"
         h="60vh"
       >
-        <ErrorMessage
+        <MyErrorMessage
           status={error.status}
           message="There was an error when attempting to retrieve book data"
         />
@@ -103,13 +64,10 @@ export default function BooksAdminPanel({}: IBooksAdminPanelProps) {
     return (
       <Box>
         <HStack m="5" direction="row">
-          <InputGroup>
-            <InputLeftElement
-              pointerEvents="none"
-              children={<Icon as={FiSearch} />}
-            />
-            <Input placeholder="Book name, Author name, etc." />
-          </InputGroup>
+          <SearchInput
+            setIsTyping={setisTyping}
+            placeholder="Title, Author name, etc."
+          />
           <Spacer />
           <Button
             onClick={() => {
@@ -139,31 +97,40 @@ export default function BooksAdminPanel({}: IBooksAdminPanelProps) {
           currentBook={currentBook}
           updateData={mutate}
         />
-        <AdminBooksTableHead
-          sortByState={sortBy}
-          setSortBy={setSortBy}
-          ascState={asc}
-          setAsc={setAsc}
-        />
-        {data?.content.map((book) => (
-          <AdminDesktopBookCard
-            key={`book-${book.id}`}
-            book={book}
-            setCurrentBook={setCurrentBook}
-            handleUpdateModalOpen={() => {
-              setModalType("update");
-              createOrUpdateBookModalState.onOpen();
-            }}
-            handleDeleteModalOpen={deleteBookModalState.onOpen}
-          />
-        ))}
-        <PaginationButtonsWrapper
-          data={data}
-          page={parseInt((router.query.page as string) || "0")}
-          handlePaginationButtonClick={(page: number) =>
-            router.push(`/admin?page=${page}`)
-          }
-        />
+        {isTyping || isLoading ? (
+          <Center w="100%" h="50vh">
+            <Spinner size="xl" />
+          </Center>
+        ) : (
+          <>
+            <AdminBooksTableHead />
+            {data?.content.map((book) => (
+              <AdminDesktopBookCard
+                key={`book-${book.id}`}
+                book={book}
+                setCurrentBook={setCurrentBook}
+                handleUpdateModalOpen={() => {
+                  setModalType("update");
+                  createOrUpdateBookModalState.onOpen();
+                }}
+                handleDeleteModalOpen={deleteBookModalState.onOpen}
+              />
+            ))}
+            <PaginationButtonsWrapper
+              data={data}
+              page={parseInt((router.query.page as string) || "0")}
+              handlePaginationButtonClick={(page: number) =>
+                router.push(
+                  `/admin/books?search=${
+                    router.query.search || ""
+                  }&page=${page}&size=${router.query.size || 24}&sortBy=${
+                    router.query.sortBy || "id"
+                  }&asc=${router.query.asc || false}`
+                )
+              }
+            />
+          </>
+        )}
         {currentBook && (
           <DeleteBookModal
             id={currentBook.id}

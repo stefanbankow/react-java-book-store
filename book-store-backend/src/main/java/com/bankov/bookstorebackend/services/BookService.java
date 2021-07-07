@@ -5,36 +5,47 @@ import com.bankov.bookstorebackend.DTOs.CreateBookForm;
 import com.bankov.bookstorebackend.exceptions.ResourceNotFoundException;
 import com.bankov.bookstorebackend.models.Author;
 import com.bankov.bookstorebackend.models.Book;
+import com.bankov.bookstorebackend.repositories.AuthorRepository;
+import com.bankov.bookstorebackend.repositories.BookRepository;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+
 import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.PagingAndSortingRepository;
+
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Service
 public class BookService {
-    private final PagingAndSortingRepository<Book, Long> bookRepository;
-    private final PagingAndSortingRepository<Author, Long> authorRepository;
+    private final BookRepository bookRepository;
+    private final AuthorRepository authorRepository;
 
-    public BookService(PagingAndSortingRepository<Book, Long> bookRepository, PagingAndSortingRepository<Author, Long> authorRepository) {
+    public BookService(BookRepository bookRepository, AuthorRepository authorRepository) {
         this.bookRepository = bookRepository;
         this.authorRepository = authorRepository;
     }
 
+
     public Page<Book> findPaginated(int page, int size, String sortBy, boolean ascending) {
-        if(ascending) {
+        if (ascending) {
             return bookRepository.findAll(PageRequest.of(page, size, Sort.by(sortBy).ascending()));
-        }
-        else {
+        } else {
             return bookRepository.findAll(PageRequest.of(page, size, Sort.by(sortBy).descending()));
         }
 
     }
+
+    public Page<Book> searchPaginated(String query, int page,int size, String sortBy, boolean ascending) {
+        if (ascending) {
+            return bookRepository.findAllByTitleContainsIgnoreCaseOrAuthor_NameContainsIgnoreCase(query, query, PageRequest.of(page, size, Sort.by(sortBy).ascending()));
+        } else {
+            return bookRepository.findAllByTitleContainsIgnoreCaseOrAuthor_NameContainsIgnoreCase(query, query, PageRequest.of(page, size, Sort.by(sortBy).descending()));
+        }
+    }
+
+
 
     public Optional<Book> findById(Long id) {
         return bookRepository.findById(id);
@@ -43,7 +54,7 @@ public class BookService {
     public Book create(CreateBookForm book) {
         Long authorId = book.getAuthorId();
         Book newBook = book.toBook();
-        if(authorId != null) {
+        if (authorId != null) {
             Author bookAuthor = authorRepository.findById(authorId)
                     .orElseThrow(() -> new ResourceNotFoundException("authorId", "There is no author with this ID"));
             newBook.setAuthor(bookAuthor);
@@ -54,7 +65,7 @@ public class BookService {
 
     public Optional<Book> update(Long id, CreateBookForm newBook) {
         return bookRepository.findById(id).map(book -> {
-            if(newBook.getAuthorId() != book.getAuthor().getId()) {
+            if (newBook.getAuthorId() != book.getAuthor().getId()) {
                 Author bookAuthor = authorRepository.findById(newBook.getAuthorId())
                         .orElseThrow(() -> new ResourceNotFoundException("authorId", "There is no author with this ID"));
                 book.setAuthor(bookAuthor);
