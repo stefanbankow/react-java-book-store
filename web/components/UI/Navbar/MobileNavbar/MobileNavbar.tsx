@@ -1,16 +1,17 @@
 import {
-  Flex,
-  SimpleGrid,
+  Text,
   Icon,
-  HStack,
   UseDisclosureProps,
+  IconButton,
+  Button,
+  HStack,
+  Box,
   Center,
 } from "@chakra-ui/react";
-import { FiMenu } from "react-icons/fi";
-import * as React from "react";
+import { FiMenu, FiShoppingCart } from "react-icons/fi";
+import React from "react";
 import HomePageLink from "../HomePageLink";
-import MobileCart from "../MobileNavbar/MobileCartButton";
-import MobileButtonWrapper from "../../Buttons/MobileButtonWrapper";
+
 import { useAppSelector } from "../../../../redux/hooks";
 
 export interface IMobileNavbarProps {
@@ -24,7 +25,7 @@ export default function MobileNavbar({
 }: IMobileNavbarProps) {
   const cartItems = useAppSelector((state) => state.cart.items);
   return (
-    <Flex
+    <Box
       zIndex="10"
       position="fixed"
       bg="brand.100"
@@ -32,42 +33,27 @@ export default function MobileNavbar({
       h="70px"
       boxShadow="0 5px 5px rgba(0, 0, 0, 0.1)"
     >
-      <SimpleGrid px="5" mx="auto" columns={3} w="100%">
-        <Flex justifyContent="left">
-          <Center>
-            <MobileButtonWrapper
-              boxSize={12}
-              flexboxProps={{
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              ariaLabel="mobile_navigation_menu"
-              onClick={menuStatus.onOpen}
-            >
-              <Icon as={FiMenu} />
-            </MobileButtonWrapper>
-          </Center>
-        </Flex>
+      <HStack position="relative" justifyContent="center" alignItems="center">
         <Center>
-          <HomePageLink size="md" />
+          <IconButton
+            aria-label="mobile_menu_button"
+            icon={<Icon as={FiMenu} />}
+            onClick={menuStatus.onOpen}
+            variant="ghost"
+          />
         </Center>
-
-        <Flex justifySelf="end" justifyContent="right">
-          <HStack>
-            <MobileButtonWrapper
-              boxSize={12}
-              flexboxProps={{
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              ariaLabel="mobile_cart_drawer"
-              onClick={cartStatus.onOpen}
-            >
-              <MobileCart itemCount={cartItems.length} />
-            </MobileButtonWrapper>
-          </HStack>
-        </Flex>
-      </SimpleGrid>
-    </Flex>
+        <Box flexGrow={1}>
+          <HomePageLink size="md" />
+        </Box>
+        <Center>
+          <Button onClick={cartStatus.onOpen} variant="ghost">
+            <HStack>
+              <Icon as={FiShoppingCart} />
+              <Text>{cartItems.length}</Text>
+            </HStack>
+          </Button>
+        </Center>
+      </HStack>
+    </Box>
   );
 }

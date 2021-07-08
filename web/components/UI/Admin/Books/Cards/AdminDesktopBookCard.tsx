@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { FiCheck, FiEdit, FiMoreVertical, FiX } from "react-icons/fi";
-import { BookProps } from "../../../../types/BookTypes";
+import { BookProps } from "../../../../../types/BookTypes";
 
 export interface IAdminDesktopBookCardProps {
   book: BookProps;
@@ -71,14 +71,14 @@ export default function AdminDesktopBookCard({
       <Text w="10%">{book.yearOfRelease || "Unknown"}</Text>
 
       <AspectRatio w="10%" ratio={0.68}>
-        <Image src={book.coverArtURL} />
+        <Image src={book.coverArtURL} alt="Image cover" />
       </AspectRatio>
       <Text w="10%">{book.author?.name}</Text>
       <Flex w="5%" justify="center">
         <Menu isLazy>
           <MenuButton
             as={IconButton}
-            aria-label="edit_book_optionss"
+            aria-label="edit_book_options"
             icon={<Icon as={FiMoreVertical} color="brand.300" />}
             borderRadius="50%"
             variant="ghost"

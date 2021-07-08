@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { Text } from "@chakra-ui/react";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
@@ -6,7 +6,7 @@ import styles from "../../../../styles/AnimatedUnderlineLink.module.css";
 
 export interface INavbarLinkProps {
   link: string;
-  children: string;
+  children: React.ReactNode;
   onClick?: () => void;
 }
 

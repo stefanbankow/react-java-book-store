@@ -104,7 +104,9 @@ export default function CreateOrUpdateBookModal({
           <Form>
             <ModalOverlay />
             <ModalContent>
-              <ModalHeader>Create Book</ModalHeader>
+              <ModalHeader>
+                {type === "create" ? "Create" : "Update"} Book
+              </ModalHeader>
               <ModalCloseButton />
               <ModalBody>
                 <VStack spacing={5} align="start">

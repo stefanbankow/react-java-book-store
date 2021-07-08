@@ -117,45 +117,44 @@ export default function Home({
             transition={{ enter: { duration: 0.5 } }}
             in={latestBooksState.isOpen}
           >
-            <Waypoint onEnter={latestBooksState.onOpen}>
-              <Box>
-                {books.totalElements ? (
-                  <LatestBooksCarousel
-                    books={books.content}
-                    totalSlides={
-                      books.content.length < 10 ? books.content.length : 10
-                    }
-                    slidesPerViewCount={slidesPerViewCount}
+            <Waypoint onEnter={latestBooksState.onOpen} />
+            <Box>
+              {books.totalElements ? (
+                <LatestBooksCarousel
+                  books={books.content}
+                  totalSlides={
+                    books.content.length < 10 ? books.content.length : 10
+                  }
+                  slidesPerViewCount={slidesPerViewCount}
+                />
+              ) : status != 200 ? (
+                <Center
+                  flexDir="column"
+                  mx="auto"
+                  textAlign="center"
+                  w="90%"
+                  h="70vh"
+                >
+                  <MyErrorMessage
+                    status={status}
+                    message="There was an error when attempting to retrieve book data, we're sorry for the inconvenience"
                   />
-                ) : status != 200 ? (
-                  <Center
-                    flexDir="column"
-                    mx="auto"
-                    textAlign="center"
-                    w="90%"
-                    h="70vh"
-                  >
-                    <MyErrorMessage
-                      status={status}
-                      message="There was an error when attempting to retrieve book data, we're sorry for the inconvenience"
-                    />
-                  </Center>
-                ) : (
-                  <Center
-                    flexDir="column"
-                    mx="auto"
-                    textAlign="center"
-                    w="90%"
-                    h="70vh"
-                  >
-                    <MyErrorMessage
-                      status={status}
-                      message="There are no books available at this time, check back later!"
-                    />
-                  </Center>
-                )}
-              </Box>
-            </Waypoint>
+                </Center>
+              ) : (
+                <Center
+                  flexDir="column"
+                  mx="auto"
+                  textAlign="center"
+                  w="90%"
+                  h="70vh"
+                >
+                  <MyErrorMessage
+                    status={status}
+                    message="There are no books available at this time, check back later!"
+                  />
+                </Center>
+              )}
+            </Box>
             <Center my="-5" mb="10">
               <Link href="/books">
                 <Box

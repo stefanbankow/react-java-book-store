@@ -30,8 +30,10 @@ export default function DeleteBookModal({
   const [error, setError] = useState<
     { message: string; status: number } | undefined
   >(undefined);
+  const [isLoading, setisLoading] = useState(false);
 
   const handleDeleteBook = async () => {
+    setisLoading(true);
     const res = await fetch(`http://localhost:3000/api/store/books/${id}`, {
       method: "DELETE",
     });
@@ -44,6 +46,7 @@ export default function DeleteBookModal({
         .then((data) => setError({ message: data.error, status: res.status }))
         .catch((err) => setError({ message: err.message, status: res.status }));
     }
+    setisLoading(false);
   };
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -66,7 +69,12 @@ export default function DeleteBookModal({
         </ModalBody>
 
         <ModalFooter>
-          <Button colorScheme="red" mr={3} onClick={handleDeleteBook}>
+          <Button
+            isLoading={isLoading}
+            colorScheme="red"
+            mr={3}
+            onClick={handleDeleteBook}
+          >
             Delete
           </Button>
           <Button variant="ghost" onClick={onClose}>

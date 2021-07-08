@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import {
   Drawer,
   DrawerCloseButton,
@@ -10,9 +10,13 @@ import {
   VStack,
   Divider,
   DrawerBody,
+  Icon,
+  Text,
+  HStack,
 } from "@chakra-ui/react";
 import NavbarLink from "../Navbar/DesktopNavbar/NavbarLink";
-import { useUser } from "@auth0/nextjs-auth0";
+import { FiLogOut, FiServer, FiUser } from "react-icons/fi";
+import { useUserWithRole } from "../../../lib/swrHooks";
 
 export interface IMenuDrawerProps {
   isOpen: boolean;
@@ -25,7 +29,9 @@ export default function MenuDrawer({
   onClose,
   placement,
 }: IMenuDrawerProps) {
-  const { isLoading, user } = useUser();
+  const { isLoading, data } = useUserWithRole();
+
+  const spacing = 3;
 
   return (
     <Drawer isOpen={isOpen} onClose={onClose} placement={placement}>
@@ -41,7 +47,7 @@ export default function MenuDrawer({
           Menu
         </DrawerHeader>
         <DrawerBody>
-          <VStack justify="left">
+          <VStack justify="left" spacing={spacing}>
             <Spacer />
             <NavbarLink link="/books" onClick={onClose}>
               Books
@@ -55,10 +61,30 @@ export default function MenuDrawer({
             <Spacer />
             <Divider orientation="horizontal" />
             <Spacer />
-            {isLoading ? null : user ? (
-              <NavbarLink link="/api/auth/logout" onClick={onClose}>
-                {user.name!}
-              </NavbarLink>
+            {isLoading ? null : data?.user ? (
+              <>
+                <Text fontWeight="bold">{data.user.name}</Text>
+                {data.isAdmin && (
+                  <NavbarLink link="/admin" onClick={onClose}>
+                    <HStack as="text">
+                      <Icon as={FiServer} />
+                      <Text>Dashboard</Text>
+                    </HStack>
+                  </NavbarLink>
+                )}
+                <NavbarLink link="/profile" onClick={onClose}>
+                  <HStack as="text">
+                    <Icon as={FiUser} />
+                    <Text>Profile</Text>
+                  </HStack>
+                </NavbarLink>
+                <NavbarLink link="/api/auth/logout" onClick={onClose}>
+                  <HStack as="text">
+                    <Icon as={FiLogOut} />
+                    <Text>Logout</Text>
+                  </HStack>
+                </NavbarLink>
+              </>
             ) : (
               <>
                 <NavbarLink link="/api/auth/login" onClick={onClose}>
