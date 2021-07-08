@@ -80,7 +80,7 @@ export default function BooksPage({}) {
               sortBy={router.query.sortBy}
               asc={router.query.asc}
               size={"24"}
-              search={router.query.search || ""}
+              search={router.query.search}
             />
             {/*Used to pre-render the next page*/}
             <div style={{ display: "none" }}>
@@ -90,7 +90,7 @@ export default function BooksPage({}) {
                 sortBy={router.query.sortBy}
                 asc={router.query.asc}
                 size={"24"}
-                search={router.query.search || ""}
+                search={router.query.search}
               />
             </div>
           </>

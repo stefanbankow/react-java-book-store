@@ -52,11 +52,15 @@ export default function CardPageAbstraction({
   const handlePaginationButtonClick = (pageIndex: number) => {
     if (isBooksPage)
       router.push(
-        `/books?search=${search}&page=${pageIndex}&sortBy=${sortBy}&asc=${asc}`
+        `/books?search=${search || ""}&page=${pageIndex}&sortBy=${
+          sortBy || "id"
+        }&asc=${asc || "false"}`
       );
     else
       router.push(
-        `/authors?search=${search}&page=${pageIndex}&sortBy=${sortBy}&asc=${asc}`
+        `/authors?search=${search || ""}&page=${pageIndex}&sortBy=${
+          sortBy || "id"
+        }&asc=${asc || "false"}`
       );
   };
 

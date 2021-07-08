@@ -75,18 +75,16 @@ export default function AuthorsPage() {
               sortBy={router.query.sortBy}
               asc={router.query.asc}
               size={"24"}
-              search={router.query.search || ""}
+              search={router.query.search}
             />
             <div style={{ display: "none" }}>
               <CardPageAbstraction
                 type="authors"
-                page={(
-                  parseInt((router.query.page as string) || "0") + 1
-                ).toString()}
+                page={(parseInt(router.query.page as string) + 1).toString()}
                 sortBy={router.query.sortBy}
                 asc={router.query.asc}
                 size={"24"}
-                search={router.query.search || ""}
+                search={router.query.search}
               />
             </div>
           </>

@@ -1,10 +1,10 @@
 import {
-  Stack,
   Flex,
   SimpleGrid,
   Icon,
   HStack,
   UseDisclosureProps,
+  Center,
 } from "@chakra-ui/react";
 import { FiMenu } from "react-icons/fi";
 import * as React from "react";
@@ -34,7 +34,7 @@ export default function MobileNavbar({
     >
       <SimpleGrid px="5" mx="auto" columns={3} w="100%">
         <Flex justifyContent="left">
-          <HStack>
+          <Center>
             <MobileButtonWrapper
               boxSize={12}
               flexboxProps={{
@@ -46,13 +46,13 @@ export default function MobileNavbar({
             >
               <Icon as={FiMenu} />
             </MobileButtonWrapper>
-          </HStack>
+          </Center>
         </Flex>
-        <Stack>
+        <Center>
           <HomePageLink size="md" />
-        </Stack>
+        </Center>
 
-        <Flex justifyContent="right">
+        <Flex justifySelf="end" justifyContent="right">
           <HStack>
             <MobileButtonWrapper
               boxSize={12}

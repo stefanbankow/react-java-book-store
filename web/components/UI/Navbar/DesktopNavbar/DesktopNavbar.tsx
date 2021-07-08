@@ -51,7 +51,11 @@ export default function DesktopNavbar({ cartStatus }: IDesktopNavbarProps) {
           <HomePageLink size="lg" />
         </Box>
 
-        <HStack justifyContent="right" spacing={{ base: "1rem", lg: "2rem" }}>
+        <HStack
+          justifySelf="end"
+          justifyContent="right"
+          spacing={{ base: "1rem", lg: "2rem" }}
+        >
           {isLoading ? (
             <div />
           ) : data && data.user ? (
