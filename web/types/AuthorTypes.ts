@@ -5,7 +5,6 @@ export interface AuthorProps {
   yearBorn: number;
   yearOfDeath: number;
   imageURL?: string;
-  yearOfRelease?: number;
 }
 
 export interface PaginatedAuthorsResponseProps {

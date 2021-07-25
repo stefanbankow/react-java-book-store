@@ -1,7 +1,7 @@
 import { getAccessToken } from "@auth0/nextjs-auth0";
 import { NextApiRequest, NextApiResponse } from "next";
 
-export default async function getBooks(
+export default async function booksRequest(
   req: NextApiRequest,
   res: NextApiResponse
 ) {

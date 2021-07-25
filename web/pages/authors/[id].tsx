@@ -79,7 +79,11 @@ export default function SingleBookPage() {
               mx={{ base: "auto", lg: "10%" }}
             >
               <AspectRatio mx="auto" w={"100%"} ratio={0.68}>
-                <Image src={data.imageURL} fallback={<Icon as={FiUser} />} />
+                <Image
+                  src={data.imageURL}
+                  fallback={<Icon as={FiUser} />}
+                  alt="Author Image"
+                />
               </AspectRatio>
             </Box>
             <Flex

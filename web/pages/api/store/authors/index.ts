@@ -1,6 +1,7 @@
+import { getAccessToken } from "@auth0/nextjs-auth0";
 import { NextApiRequest, NextApiResponse } from "next";
 
-export default async function getAuthors(
+export default async function authorsRequest(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
@@ -16,6 +17,28 @@ export default async function getAuthors(
         );
         const authors = await response.json();
         res.status(response.status || 200).json(authors);
+      } catch (error) {
+        console.error(error.message);
+        res.status(error.status || 500).json(error);
+      }
+      break;
+    case "POST":
+      try {
+        const { accessToken } = await getAccessToken(req, res);
+
+        const response = await fetch(
+          `http://localhost:8080/api/store/authors`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify(req.body),
+          }
+        );
+        const author = await response.json();
+        res.status(response.status || 200).json(author);
       } catch (error) {
         console.error(error.message);
         res.status(error.status || 500).json(error);

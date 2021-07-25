@@ -73,6 +73,32 @@ export function useAuthors(
   };
 }
 
+export function useAuthorsAdmin(
+  search: string | string[] | undefined,
+  page: string | string[] | undefined,
+  pageSize: string | string[] | undefined,
+  sortBy: string | string[] | undefined,
+  asc: string | string[] | undefined,
+  isTyping: boolean
+) {
+  const { data, error, mutate, isValidating } = useSWR(
+    !isTyping
+      ? `/api/store/authors?search=${search || ""}&page=${page || 0}&size=${
+          pageSize || 24
+        }&sortBy=${sortBy || "id"}&asc=${asc || false}`
+      : null,
+    fetcher
+  );
+
+  return {
+    data: data as PaginatedAuthorsResponseProps,
+    isLoading: !error && !data,
+    error,
+    mutate,
+    isValidating,
+  };
+}
+
 export const useUserWithRole = () => {
   const { data, error } = useSWR("/api/auth/user", fetcher);
   return {

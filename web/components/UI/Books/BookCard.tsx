@@ -54,6 +54,7 @@ export default function LatestBookCard({ book }: BookCardProps) {
               <Image
                 src={book.coverArtURL}
                 fallback={<Icon as={FiBookOpen} />}
+                alt="Book Image"
               />
             </AspectRatio>
             <Stack direction="column" spacing={2.5} mx="auto" w="100%" flex={1}>

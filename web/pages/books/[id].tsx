@@ -87,6 +87,7 @@ export default function SingleBookPage() {
                 <Image
                   src={data.coverArtURL}
                   fallback={<Icon as={FiBookOpen} />}
+                  alt="Book Image"
                 />
               </AspectRatio>
             </Box>

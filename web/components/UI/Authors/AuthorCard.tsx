@@ -44,7 +44,11 @@ export default function AuthorCard({ author }: IAuthorProps) {
             }}
           >
             <AspectRatio m="10px auto" w="75%" ratio={0.68}>
-              <Image src={author.imageURL} fallback={<Icon as={FiUser} />} />
+              <Image
+                src={author.imageURL}
+                alt="Author Image"
+                fallback={<Icon as={FiUser} />}
+              />
             </AspectRatio>
             <Stack direction="column" mx="auto" w="100%" flex={1}>
               <Center mx="3" flexDir="column" textAlign="center">

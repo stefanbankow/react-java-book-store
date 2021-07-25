@@ -14,28 +14,22 @@ import {
   MenuList,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
-import {
-  FiBookOpen,
-  FiCheck,
-  FiEdit,
-  FiMoreVertical,
-  FiX,
-} from "react-icons/fi";
-import { BookProps } from "../../../../../types/BookTypes";
+import { FiEdit, FiMoreVertical, FiUser, FiX } from "react-icons/fi";
+import { AuthorProps } from "../../../../../types/AuthorTypes";
 
-export interface IAdminDesktopBookCardProps {
-  book: BookProps;
-  setCurrentBook: React.Dispatch<React.SetStateAction<BookProps | null>>;
+export interface IAdminDesktopAuthorCardProps {
+  author: AuthorProps;
+  setCurrentAuthor: React.Dispatch<React.SetStateAction<AuthorProps | null>>;
   handleUpdateModalOpen: () => void;
   handleDeleteModalOpen: () => void;
 }
 
-export default function AdminDesktopBookCard({
-  book,
-  setCurrentBook,
+export default function AdminDesktopAuthorCard({
+  author,
+  setCurrentAuthor,
   handleUpdateModalOpen,
   handleDeleteModalOpen,
-}: IAdminDesktopBookCardProps) {
+}: IAdminDesktopAuthorCardProps) {
   const [show, setShow] = useState(false);
 
   const handleToggle = () => setShow(!show);
@@ -52,38 +46,36 @@ export default function AdminDesktopBookCard({
       px="5"
       spacing={5}
     >
-      <Text w="5%">{book.id}</Text>
-      <Text w="15%">{book.title}</Text>
-      <Flex py="5" direction="column" justify="center" w="20%">
-        {!book.description ? (
+      <Text w="10%">{author.id}</Text>
+      <Text w="20%">{author.name}</Text>
+      <Flex py="5" direction="column" justify="center" w="30%">
+        {!author.description ? (
           <Text>No description given</Text>
-        ) : book.description.length > 180 ? (
+        ) : author.description.length > 180 ? (
           <>
             <Collapse startingHeight={70} in={show}>
-              <Text mx="auto">{book.description}</Text>
+              <Text mx="auto">{author.description}</Text>
             </Collapse>
             <Button variant="link" size="sm" onClick={handleToggle} mt="1rem">
               Show {show ? "Less" : "More"}
             </Button>
           </>
         ) : (
-          <Text>{book.description}</Text>
+          <Text>{author.description}</Text>
         )}
       </Flex>
-      <Text w="5%">{book.price}</Text>
-      <Flex justify="center" w="5%">
-        {book.forSale ? <Icon as={FiCheck} /> : <Icon as={FiX} />}
-      </Flex>
-      <Text w="10%">{book.yearOfRelease || "Unknown"}</Text>
+      <Text w="15%">{author.yearBorn || "Unknown"}</Text>
+
+      <Text w="15%">{author.yearOfDeath || "Unknown"}</Text>
 
       <AspectRatio w="10%" ratio={0.68}>
         <Image
-          src={book.coverArtURL}
-          alt="Book cover"
-          fallback={<Icon as={FiBookOpen} />}
+          src={author.imageURL}
+          alt="Author Image"
+          fallback={<Icon as={FiUser} />}
         />
       </AspectRatio>
-      <Text w="10%">{book.author?.name}</Text>
+
       <Flex w="5%" justify="center">
         <Menu isLazy>
           <MenuButton
@@ -92,7 +84,7 @@ export default function AdminDesktopBookCard({
             icon={<Icon as={FiMoreVertical} color="brand.300" />}
             borderRadius="50%"
             variant="ghost"
-            onClick={() => setCurrentBook(book)}
+            onClick={() => setCurrentAuthor(author)}
           />
           <MenuList>
             <MenuItem

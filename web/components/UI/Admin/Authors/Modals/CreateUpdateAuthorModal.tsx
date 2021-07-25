@@ -1,6 +1,5 @@
 import {
   Button,
-  Checkbox,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -12,51 +11,47 @@ import {
   Text,
   Box,
 } from "@chakra-ui/react";
-import { Field, FieldProps, Form, Formik, FormikHelpers } from "formik";
+import { Form, Formik, FormikHelpers } from "formik";
 import React, { useState } from "react";
-import { BookProps } from "../../../../../types/BookTypes";
+import { AuthorProps } from "../../../../../types/AuthorTypes";
 import ChakraFormikFormField from "../../../Forms/ChakraFormikFormField";
 import ChakraFormikNumberInput from "../../../Forms/ChakraFormikNumberInput";
 import ChakraFormikTextArea from "../../../Forms/ChakraFormikTextArea";
 
-export interface ICreateOrUpdateBookModalProps {
+export interface ICreateOrUpdateAuthorModalProps {
   isOpen: boolean;
   onClose: () => void;
   type: "create" | "update";
-  currentBook: BookProps | null;
+  currentAuthor: AuthorProps | null;
   updateData: () => void;
 }
 
-export default function CreateOrUpdateBookModal({
+export default function CreateOrUpdateAuthorModal({
   isOpen,
   onClose,
   type,
-  currentBook,
+  currentAuthor,
   updateData,
-}: ICreateOrUpdateBookModalProps) {
-  const isCreateModal = type === "create";
+}: ICreateOrUpdateAuthorModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const initialValues = isCreateModal
-    ? {
-        title: undefined,
-        description: undefined,
-        forSale: true,
-        price: undefined,
-        coverArtURL: undefined,
-        yearOfRelease: undefined,
-        authorId: undefined,
-      }
-    : {
-        title: currentBook?.title,
-        description: currentBook?.description,
-        forSale: currentBook?.forSale,
-        price: currentBook?.price,
-        coverArtURL: currentBook?.coverArtURL,
-        yearOfRelease: currentBook?.yearOfRelease,
-        authorId: currentBook?.author.id,
-      };
+  const initialValues =
+    type === "create"
+      ? {
+          name: undefined,
+          description: undefined,
+          yearBorn: undefined,
+          yearOfDeath: undefined,
+          imageURL: undefined,
+        }
+      : {
+          name: currentAuthor?.name,
+          description: currentAuthor?.description,
+          yearBorn: currentAuthor?.yearBorn,
+          yearOfDeath: currentAuthor?.yearOfDeath,
+          imageURL: currentAuthor?.imageURL,
+        };
 
-  const handleBookSubmit = async (
+  const handleAuthorSubmit = async (
     values: typeof initialValues,
     actions: FormikHelpers<typeof initialValues>,
     requestType: "POST" | "PATCH"
@@ -64,8 +59,8 @@ export default function CreateOrUpdateBookModal({
     try {
       const response = await fetch(
         requestType === "POST"
-          ? "http://localhost:3000/api/store/books"
-          : `http://localhost:3000/api/store/books/${currentBook?.id}`,
+          ? "http://localhost:3000/api/store/authors"
+          : `http://localhost:3000/api/store/authors/${currentAuthor?.id}`,
         {
           method: requestType,
           headers: { "Content-Type": "application/json" },
@@ -83,6 +78,7 @@ export default function CreateOrUpdateBookModal({
         actions.setStatus({ error: data.error });
       }
     } catch (error) {
+      console.error(error);
       actions.setStatus({ error: error.message });
     }
   };
@@ -94,8 +90,8 @@ export default function CreateOrUpdateBookModal({
         onSubmit={async (values, actions) => {
           setIsLoading(true);
           type === "create"
-            ? await handleBookSubmit(values, actions, "POST")
-            : await handleBookSubmit(values, actions, "PATCH");
+            ? await handleAuthorSubmit(values, actions, "POST")
+            : await handleAuthorSubmit(values, actions, "PATCH");
 
           setIsLoading(false);
         }}
@@ -105,59 +101,40 @@ export default function CreateOrUpdateBookModal({
             <ModalOverlay />
             <ModalContent>
               <ModalHeader>
-                {isCreateModal ? "Create" : "Update"} Book
+                {type === "create" ? "Create" : "Update"} Author
               </ModalHeader>
               <ModalCloseButton />
               <ModalBody>
                 <VStack spacing={5} align="start">
                   <ChakraFormikFormField
                     isRequired
-                    fieldName="title"
-                    label="Title"
+                    fieldName="name"
+                    label="Name"
                   />
-                  <Field name="forSale">
-                    {({ field }: FieldProps) => (
-                      <Checkbox
-                        colorScheme={isCreateModal ? "green" : "blue"}
-                        {...field}
-                        isChecked={field.value}
-                      >
-                        For Sale
-                      </Checkbox>
-                    )}
-                  </Field>
                   <ChakraFormikTextArea
                     fieldName="description"
                     label="Description"
                   />
                   <ChakraFormikNumberInput
                     isRequired
-                    fieldName="price"
-                    label="Price"
+                    fieldName="yearBorn"
+                    label="Year of birth"
                     min={99}
                     max={99999}
                     step={50}
                   />
 
                   <ChakraFormikNumberInput
-                    fieldName="yearOfRelease"
-                    label="Year of Release"
+                    fieldName="yearOfDeath"
+                    label="Year of Death"
                     min={0}
                     max={2025}
                     step={1}
                   />
 
                   <ChakraFormikFormField
-                    isRequired
-                    fieldName="coverArtURL"
-                    label="Cover Art URL"
-                  />
-                  <ChakraFormikNumberInput
-                    isRequired
-                    fieldName="authorId"
-                    label="Author ID"
-                    min={1}
-                    step={1}
+                    fieldName="imageURL"
+                    label="Image URL"
                   />
                   {status && (
                     <Box textAlign="center" w="100%">
@@ -170,7 +147,7 @@ export default function CreateOrUpdateBookModal({
               </ModalBody>
 
               <ModalFooter>
-                {isCreateModal ? (
+                {type === "create" ? (
                   <Button
                     isLoading={isLoading}
                     colorScheme="green"

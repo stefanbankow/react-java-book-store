@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
-export interface IAdminBookPanelButtonProps {
+export interface IAdminTableHeadButton {
   type: string;
   width: string;
   children: React.ReactNode;
@@ -13,7 +13,7 @@ export default function AdminBookPanelButton({
   type,
   width,
   children,
-}: IAdminBookPanelButtonProps) {
+}: IAdminTableHeadButton) {
   const router = useRouter();
   const handleSortButtonClick = () => {
     const query = router.query;

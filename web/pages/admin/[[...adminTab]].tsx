@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import BooksAdminPanel from "../../components/UI/Admin/Books/BooksAdminPanel";
+import AdminTabPanel from "../../components/UI/Admin/AdminTabPanel";
 import MyErrorMessage from "../../components/UI/MyErrorMessage";
 import { useUserWithRole } from "../../lib/swrHooks";
 
@@ -96,10 +96,10 @@ export default function AdminTab({}: IAdminTabProps) {
             <TabPanels>
               <TabPanel />
               <TabPanel>
-                <BooksAdminPanel />
+                <AdminTabPanel tabType="books" />
               </TabPanel>
               <TabPanel>
-                <p>two!</p>
+                <AdminTabPanel tabType="authors" />
               </TabPanel>
             </TabPanels>
           </Tabs>

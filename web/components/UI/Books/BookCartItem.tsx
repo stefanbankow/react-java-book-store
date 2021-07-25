@@ -4,6 +4,7 @@ import {
   Button,
   CloseButton,
   Flex,
+  Icon,
   Image,
   Input,
   Spacer,
@@ -13,6 +14,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import React from "react";
+import { FiBookOpen } from "react-icons/fi";
 import { useAppDispatch } from "../../../redux/hooks";
 import { changeQuantity, removeItem } from "../../../redux/slices/cartSlice";
 import { BookProps } from "../../../types/BookTypes";
@@ -67,7 +69,11 @@ export default function BookCartItem({ book, quantity }: IBookCartItemProps) {
           h="90%"
           ratio={0.68}
         >
-          <Image src={book.coverArtURL} />
+          <Image
+            src={book.coverArtURL}
+            alt="Book Cover"
+            fallback={<Icon as={FiBookOpen} />}
+          />
         </AspectRatio>
         <Spacer />
         <VStack m="auto" spacing={7} mx="auto">
