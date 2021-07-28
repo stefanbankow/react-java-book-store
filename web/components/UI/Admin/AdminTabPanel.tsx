@@ -25,11 +25,10 @@ import BookSortByMenu from "../Books/SortByMenu";
 import PaginationButtonsWrapper from "../Buttons/Pagination/PaginationButtonsWrapper";
 import SearchInput from "../Forms/SearchInput";
 import MyErrorMessage from "../MyErrorMessage";
-import AdminAuthorCardPage from "./Authors/AdminAuthorsCardPage";
+import AdminAuthorCardTab from "./Authors/AdminAuthorsCardTab";
 import CreateOrUpdateAuthorModal from "./Authors/Modals/CreateUpdateAuthorModal";
 import DeleteAuthorModal from "./Authors/Modals/DeleteAuthorModal";
-import AdminBookCardPage from "./Books/AdminBookCardsPage";
-
+import AdminBookCardTab from "./Books/AdminBookCardsTab";
 import CreateUpdateBookModal from "./Books/Modals/CreateUpdateBookModal";
 import DeleteBookModal from "./Books/Modals/DeleteBookModal";
 
@@ -104,7 +103,7 @@ export default function AdminTabPanel({ tabType }: IAdminTabPanelProps) {
   if (tabType === "orders") {
   } else if (tabType === "books") {
     contentPage = data && (
-      <AdminBookCardPage
+      <AdminBookCardTab
         data={data as PaginatedBooksResponseProps}
         smallScreen={smallScreen}
         createOrUpdateBookModalState={createOrUpdateItemModalState}
@@ -137,7 +136,7 @@ export default function AdminTabPanel({ tabType }: IAdminTabPanelProps) {
     );
   } else {
     contentPage = data && (
-      <AdminAuthorCardPage
+      <AdminAuthorCardTab
         data={data as PaginatedAuthorsResponseProps}
         smallScreen={smallScreen}
         createOrUpdateAuthorModalState={createOrUpdateItemModalState}

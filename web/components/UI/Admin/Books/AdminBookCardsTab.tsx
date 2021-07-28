@@ -4,11 +4,12 @@ import {
   BookProps,
   PaginatedBooksResponseProps,
 } from "../../../../types/BookTypes";
-import AdminBooksTableHead from "./Cards/AdminBooksTableHead";
-import AdminDesktopBookCard from "./Cards/AdminDesktopBookCard";
-import AdminMobileBookCard from "./Cards/MobileAdminCard/AdminMobileBookCard";
+import TabTableHead from "../TabTableHead";
+import AdminMobileBookCard from "./Mobile/AdminMobileBookCard";
+import DesktopTabEntityRow from "../DesktopTabEntityRow";
+import { AuthorProps } from "../../../../types/AuthorTypes";
 
-export interface IAdminBookCardPageProps {
+export interface IAdminBookCardTabProps {
   data: PaginatedBooksResponseProps;
   smallScreen: boolean;
   setModalType: (type: "update" | "create") => void;
@@ -17,14 +18,14 @@ export interface IAdminBookCardPageProps {
   deleteBookModalState: UseDisclosureReturn;
 }
 
-export default function AdminBookCardPage({
+export default function AdminBookCardTab({
   data,
   smallScreen,
   setCurrentBook,
   setModalType,
   createOrUpdateBookModalState,
   deleteBookModalState,
-}: IAdminBookCardPageProps) {
+}: IAdminBookCardTabProps) {
   return (
     <>
       {smallScreen ? (
@@ -42,12 +43,17 @@ export default function AdminBookCardPage({
         ))
       ) : (
         <>
-          <AdminBooksTableHead />
+          <TabTableHead type="books" />
           {data?.content.map((book) => (
-            <AdminDesktopBookCard
+            <DesktopTabEntityRow
+              type="books"
               key={`book-${book.id}`}
-              book={book}
-              setCurrentBook={setCurrentBook}
+              entity={book}
+              setCurrentEntity={
+                setCurrentBook as React.Dispatch<
+                  React.SetStateAction<AuthorProps | BookProps | null>
+                >
+              }
               handleUpdateModalOpen={() => {
                 setModalType("update");
                 createOrUpdateBookModalState.onOpen();

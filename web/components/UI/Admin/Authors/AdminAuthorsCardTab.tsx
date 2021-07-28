@@ -4,12 +4,13 @@ import {
   PaginatedAuthorsResponseProps,
   AuthorProps,
 } from "../../../../types/AuthorTypes";
+import { BookProps } from "../../../../types/BookTypes";
+import DesktopTabEntityRow from "../DesktopTabEntityRow";
+import TabTableHead from "../TabTableHead";
 
-import AdminAuthorsTableHead from "./Cards/AdminAuthorsTableHead";
-import AdminDesktopAuthorCard from "./Cards/AdminDesktopAuthorCard";
-import AdminMobileAuthorCard from "./Cards/MobileAdminCard/AdminMobileAuthorCard";
+import AdminMobileAuthorCard from "./Mobile/AdminMobileAuthorCard";
 
-export interface IAdminAuthorCardPageProps {
+export interface IAdminAuthorCardTabProps {
   data: PaginatedAuthorsResponseProps;
   smallScreen: boolean;
   setModalType: (type: "update" | "create") => void;
@@ -18,14 +19,14 @@ export interface IAdminAuthorCardPageProps {
   deleteAuthorModalState: UseDisclosureReturn;
 }
 
-export default function AdminAuthorCardPage({
+export default function AdminAuthorCardTab({
   data,
   smallScreen,
   setCurrentAuthor,
   setModalType,
   createOrUpdateAuthorModalState,
   deleteAuthorModalState,
-}: IAdminAuthorCardPageProps) {
+}: IAdminAuthorCardTabProps) {
   return (
     <>
       {smallScreen ? (
@@ -43,12 +44,17 @@ export default function AdminAuthorCardPage({
         ))
       ) : (
         <>
-          <AdminAuthorsTableHead />
+          <TabTableHead type="authors" />
           {data?.content.map((author) => (
-            <AdminDesktopAuthorCard
+            <DesktopTabEntityRow
+              type="authors"
               key={`author-${author.id}`}
-              author={author}
-              setCurrentAuthor={setCurrentAuthor}
+              entity={author}
+              setCurrentEntity={
+                setCurrentAuthor as React.Dispatch<
+                  React.SetStateAction<AuthorProps | BookProps | null>
+                >
+              }
               handleUpdateModalOpen={() => {
                 setModalType("update");
                 createOrUpdateAuthorModalState.onOpen();

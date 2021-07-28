@@ -5,13 +5,11 @@ import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 export interface IAdminTableHeadButton {
   type: string;
-  width: string;
   children: React.ReactNode;
 }
 
 export default function AdminBookPanelButton({
   type,
-  width,
   children,
 }: IAdminTableHeadButton) {
   const router = useRouter();
@@ -44,7 +42,6 @@ export default function AdminBookPanelButton({
       onClick={handleSortButtonClick}
       whiteSpace="normal"
       h="50px"
-      w={width}
     >
       {children}
       {(router.query.sortBy || "id") === type &&

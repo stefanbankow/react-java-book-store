@@ -1,4 +1,8 @@
-import { getAccessToken } from "@auth0/nextjs-auth0";
+import {
+  getEntityById,
+  updateEntity,
+  deleteEntity,
+} from "../../../../lib/api/entityRequests";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function singleAuthorRequest(
@@ -7,71 +11,11 @@ export default async function singleAuthorRequest(
 ) {
   switch (req.method) {
     case "GET":
-      try {
-        const {
-          query: { id },
-        } = req;
-        const response = await fetch(
-          `http://localhost:8080/api/store/authors/${id}`
-        );
-        if (response.status >= 200 && response.status <= 299) {
-          const authors = await response.json();
-          return res.status(response.status).json(authors);
-        }
-
-        return res.status(response.status).json(response);
-      } catch (error) {
-        console.error({ ...error });
-        res.status(500).json(error);
-      }
-      break;
+      return getEntityById("authors", req, res);
     case "PATCH":
-      try {
-        const {
-          query: { id },
-        } = req;
-        const { accessToken } = await getAccessToken(req, res);
-        const response = await fetch(
-          `http://localhost:8080/api/store/authors/${id}`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-              authorization: `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify(req.body),
-          }
-        );
-        const author = await response.json();
-        res.status(response.status || 200).json(author);
-      } catch (error) {
-        res.status(error.status || 500).json({ error: error.message });
-      }
-      break;
+      return updateEntity("authors", req, res);
     case "DELETE":
-      try {
-        const {
-          query: { id },
-        } = req;
-        const { accessToken } = await getAccessToken(req, res);
-        const response = await fetch(
-          `http://localhost:8080/api/store/authors/${id}`,
-          {
-            method: "DELETE",
-            headers: {
-              authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
-        if (response.status === 204) {
-          return res.status(response.status).json({});
-        }
-        return res.status(response.status || 200).json(response);
-      } catch (error) {
-        console.error({ ...error });
-        res.status(error.status || 500).json({ error: error.message });
-      }
-      break;
+      return deleteEntity("authors", req, res);
     default:
       break;
   }

@@ -11,24 +11,25 @@ import {
   Icon,
 } from "@chakra-ui/react";
 
+import Link from "next/link";
 import React, { useState } from "react";
-import { FiBookOpen, FiEdit, FiX } from "react-icons/fi";
-import { AuthorProps } from "../../../../../../types/AuthorTypes";
-import AdminMobileCardSection from "../../Mobile/AdminMobileCardSection";
+import { FiBookOpen, FiCheck, FiEdit, FiX } from "react-icons/fi";
+import { BookProps } from "../../../../../types/BookTypes";
+import AdminMobileCardSection from "../../AdminMobileCardSection";
 
-export interface IAdminMobileAuthorCardProps {
-  author: AuthorProps;
-  setCurrentAuthor: React.Dispatch<React.SetStateAction<AuthorProps | null>>;
+export interface IAdminMobileBookCardProps {
+  book: BookProps;
+  setCurrentBook: React.Dispatch<React.SetStateAction<BookProps | null>>;
   handleUpdateModalOpen: () => void;
   handleDeleteModalOpen: () => void;
 }
 
-export default function AdminMobileAuthorCard({
-  author,
-  setCurrentAuthor,
+export default function AdminMobileBookCard({
+  book,
+  setCurrentBook,
   handleUpdateModalOpen,
   handleDeleteModalOpen,
-}: IAdminMobileAuthorCardProps) {
+}: IAdminMobileBookCardProps) {
   const [show, setShow] = useState(false);
   const handleToggle = () => setShow(!show);
 
@@ -47,25 +48,25 @@ export default function AdminMobileAuthorCard({
     >
       <AspectRatio mx="auto" w="75%" ratio={0.68}>
         <Image
-          src={author.imageURL}
-          alt="Author Cover"
+          src={book.coverArtURL}
+          alt="Book Cover"
           fallback={<Icon as={FiBookOpen} />}
         />
       </AspectRatio>
       <Box w="100%" textAlign="center">
-        <AdminMobileCardSection type="ID:" content={author.id} />
-        <AdminMobileCardSection type="Title:" content={author.name} />
+        <AdminMobileCardSection type="ID:" content={book.id} />
+        <AdminMobileCardSection type="Title:" content={book.title} />
         <Box my="5">
           <Text align="left" fontWeight="bold">
             Descripton:
           </Text>
           <VStack>
-            {!author.description ? (
+            {!book.description ? (
               <Text align="right">No description given</Text>
-            ) : author.description.length > 180 ? (
+            ) : book.description.length > 180 ? (
               <>
                 <Collapse startingHeight={70} in={show}>
-                  <Text align="right">{author.description}</Text>
+                  <Text align="right">{book.description}</Text>
                 </Collapse>
                 <Button
                   variant="link"
@@ -77,28 +78,45 @@ export default function AdminMobileAuthorCard({
                 </Button>
               </>
             ) : (
-              <Text align="right">{author.description}</Text>
+              <Text align="right">{book.description}</Text>
             )}
           </VStack>
         </Box>
         <Divider />
         <AdminMobileCardSection
-          type="Year of birth:"
-          content={author.yearBorn}
+          type="Price:"
+          content={book.price}
+          isEmptyMessage="Not given"
+        />
+        <AdminMobileCardSection
+          type="Year of Release:"
+          content={book.yearOfRelease}
+          isEmptyMessage="Not given"
+        />
+        <AdminMobileCardSection
+          type="For Sale?:"
+          content={book.forSale ? <Icon as={FiCheck} /> : <Icon as={FiX} />}
           isEmptyMessage="Not given"
         />
         <AdminMobileCardSection
           isLast
-          type="Year of death:"
-          content={author.yearOfDeath}
+          type="Author:"
+          content={
+            book.author && (
+              <Text as="u">
+                <Link href={`/authors/${book.author?.id}`}>
+                  {book.author.name}
+                </Link>
+              </Text>
+            )
+          }
           isEmptyMessage="Not given"
         />
-
         <HStack justify="center">
           <Button
             leftIcon={<Icon as={FiEdit} />}
             onClick={() => {
-              setCurrentAuthor(author);
+              setCurrentBook(book);
               handleUpdateModalOpen();
             }}
             colorScheme="blue"
@@ -109,7 +127,7 @@ export default function AdminMobileAuthorCard({
             colorScheme="red"
             leftIcon={<Icon as={FiX} />}
             onClick={() => {
-              setCurrentAuthor(author);
+              setCurrentBook(book);
               handleDeleteModalOpen();
             }}
           >
