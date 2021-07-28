@@ -1,5 +1,6 @@
 package com.bankov.bookstorebackend.repositories;
 
+import com.bankov.bookstorebackend.models.Author;
 import com.bankov.bookstorebackend.models.Book;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -10,5 +11,6 @@ import org.springframework.stereotype.Repository;
 @Qualifier("books")
 @Repository
 public interface BookRepository extends PagingAndSortingRepository<Book, Long> {
+    void deleteAllByAuthor(Author author);
     Page<Book> findAllByTitleContainsIgnoreCaseOrAuthor_NameContainsIgnoreCase(String query, String query2, Pageable page);
 }

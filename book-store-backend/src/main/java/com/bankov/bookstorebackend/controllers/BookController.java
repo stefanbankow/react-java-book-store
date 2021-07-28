@@ -29,40 +29,30 @@ public class BookController {
                                                          @RequestParam(required = false, defaultValue = "id") String sortBy,
                                                          @RequestParam(required = false, defaultValue = "false") boolean asc,
                                                          @RequestParam(required = false) String search) {
-        Page<Book> books;
-        if (!search.equals("")) books = service.searchPaginated(search, page, size, sortBy, asc);
-        else
-            books = service.findPaginated(page, size, sortBy, asc);
-
-        return ResponseEntity.ok().body(books);
+        return service.getAllBooksPaginated(search, page, size, sortBy, asc);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Book> findBookById(@PathVariable("id") Long id) {
-        Optional<Book> book = service.findById(id);
-        return ResponseEntity.of(book);
+        return service.getBookById(id);
     }
 
     @PostMapping
     @PreAuthorize("hasAuthority('create:books')")
     public ResponseEntity<Book> createBook(@Valid @RequestBody CreateBookForm book) {
-        Book newBook = service.create(book);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-                .buildAndExpand(newBook.getId()).toUri();
-        return ResponseEntity.created(location).body(newBook);
+        return service.postBook(book);
     }
 
     @PatchMapping("/{id}")
     @PreAuthorize("hasAuthority('update:books')")
     public ResponseEntity<Book> updateBook(@PathVariable("id") Long id, @Valid @RequestBody CreateBookForm newBook) {
-        return ResponseEntity.of(service.update(id, newBook));
+        return service.updateBook(id, newBook);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('delete:books')")
     public ResponseEntity<Book> deleteBook(@PathVariable("id") Long id) {
-        service.delete(id);
-        return ResponseEntity.noContent().build();
+        return service.deleteBook(id);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)

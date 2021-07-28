@@ -13,11 +13,16 @@ import org.springframework.data.domain.PageRequest;
 
 import org.springframework.data.domain.Sort;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.transaction.Transactional;
+import java.net.URI;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class BookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
@@ -27,8 +32,15 @@ public class BookService {
         this.authorRepository = authorRepository;
     }
 
+    public ResponseEntity<Page<Book>> getAllBooksPaginated(String searchQuery, int page, int size, String sortBy, boolean ascending) {
+        if (searchQuery.equals("")) {
+            return ResponseEntity.ok().body(findAllPaginated(page, size, sortBy, ascending));
+        } else {
+            return ResponseEntity.ok().body(searchAllPaginated(searchQuery, page, size, sortBy, ascending));
+        }
+    }
 
-    public Page<Book> findPaginated(int page, int size, String sortBy, boolean ascending) {
+    private Page<Book> findAllPaginated(int page, int size, String sortBy, boolean ascending) {
         if (ascending) {
             return bookRepository.findAll(PageRequest.of(page, size, Sort.by(sortBy).ascending()));
         } else {
@@ -37,21 +49,32 @@ public class BookService {
 
     }
 
-    public Page<Book> searchPaginated(String query, int page,int size, String sortBy, boolean ascending) {
+    private Page<Book> searchAllPaginated(String searchQuery, int page, int size, String sortBy, boolean ascending) {
         if (ascending) {
-            return bookRepository.findAllByTitleContainsIgnoreCaseOrAuthor_NameContainsIgnoreCase(query, query, PageRequest.of(page, size, Sort.by(sortBy).ascending()));
+            return bookRepository.findAllByTitleContainsIgnoreCaseOrAuthor_NameContainsIgnoreCase(
+                    searchQuery, searchQuery, PageRequest.of(page, size, Sort.by(sortBy).ascending()));
         } else {
-            return bookRepository.findAllByTitleContainsIgnoreCaseOrAuthor_NameContainsIgnoreCase(query, query, PageRequest.of(page, size, Sort.by(sortBy).descending()));
+            return bookRepository.findAllByTitleContainsIgnoreCaseOrAuthor_NameContainsIgnoreCase(
+                    searchQuery, searchQuery, PageRequest.of(page, size, Sort.by(sortBy).descending()));
         }
     }
 
+    public ResponseEntity<Book> getBookById(Long id) {
+        return ResponseEntity.of(findById(id));
+    }
 
-
-    public Optional<Book> findById(Long id) {
+    private Optional<Book> findById(Long id) {
         return bookRepository.findById(id);
     }
 
-    public Book create(CreateBookForm book) {
+    public ResponseEntity<Book> postBook(CreateBookForm book) {
+        Book newBook = create(book);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                .buildAndExpand(newBook.getId()).toUri();
+        return ResponseEntity.created(location).body(newBook);
+    }
+
+    private Book create(CreateBookForm book) {
         Long authorId = book.getAuthorId();
         Book newBook = book.toBook();
         if (authorId != null) {
@@ -63,7 +86,11 @@ public class BookService {
         return newBook;
     }
 
-    public Optional<Book> update(Long id, CreateBookForm newBook) {
+    public ResponseEntity<Book> updateBook(Long id, CreateBookForm newBook) {
+        return ResponseEntity.of(update(id, newBook));
+    }
+
+    private Optional<Book> update(Long id, CreateBookForm newBook) {
         return bookRepository.findById(id).map(book -> {
             if (newBook.getAuthorId() != book.getAuthor().getId()) {
                 Author bookAuthor = authorRepository.findById(newBook.getAuthorId())
@@ -75,7 +102,12 @@ public class BookService {
         });
     }
 
-    public void delete(Long id) {
+    public ResponseEntity<Book> deleteBook(Long id) {
+        delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    private void delete(Long id) {
         bookRepository.deleteById(id);
     }
 }
