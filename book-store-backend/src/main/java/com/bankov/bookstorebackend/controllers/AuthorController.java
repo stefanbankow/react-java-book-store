@@ -1,7 +1,7 @@
 package com.bankov.bookstorebackend.controllers;
 
-import com.bankov.bookstorebackend.services.AuthorService;
 import com.bankov.bookstorebackend.models.Author;
+import com.bankov.bookstorebackend.services.AuthorService;
 import com.bankov.bookstorebackend.services.BookService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +25,8 @@ public class AuthorController {
                                                             @RequestParam(required = false, defaultValue = "24") int size,
                                                             @RequestParam(required = false, defaultValue = "id") String sortBy,
                                                             @RequestParam(required = false, defaultValue = "false") boolean asc,
-                                                            @RequestParam(required = false, defaultValue = "") String search) {
-        return service.getAllBooksPaginated(search, page, size, sortBy, asc);
+                                                            @RequestParam(required = false) String search) {
+        return service.getAllAuthorsPaginated(search, page, size, sortBy, asc);
     }
 
     @GetMapping("/{id}")

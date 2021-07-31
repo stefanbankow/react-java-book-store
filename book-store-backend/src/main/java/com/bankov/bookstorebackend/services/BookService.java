@@ -7,18 +7,16 @@ import com.bankov.bookstorebackend.models.Author;
 import com.bankov.bookstorebackend.models.Book;
 import com.bankov.bookstorebackend.repositories.AuthorRepository;
 import com.bankov.bookstorebackend.repositories.BookRepository;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-
 import org.springframework.data.domain.Sort;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.transaction.Transactional;
 import java.net.URI;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -33,7 +31,7 @@ public class BookService {
     }
 
     public ResponseEntity<Page<Book>> getAllBooksPaginated(String searchQuery, int page, int size, String sortBy, boolean ascending) {
-        if (searchQuery.equals("")) {
+        if (searchQuery == null || searchQuery.equals("")) {
             return ResponseEntity.ok().body(findAllPaginated(page, size, sortBy, ascending));
         } else {
             return ResponseEntity.ok().body(searchAllPaginated(searchQuery, page, size, sortBy, ascending));
@@ -92,7 +90,7 @@ public class BookService {
 
     private Optional<Book> update(Long id, CreateBookForm newBook) {
         return bookRepository.findById(id).map(book -> {
-            if (newBook.getAuthorId() != book.getAuthor().getId()) {
+            if (!Objects.equals(newBook.getAuthorId(), book.getAuthor().getId())) {
                 Author bookAuthor = authorRepository.findById(newBook.getAuthorId())
                         .orElseThrow(() -> new ResourceNotFoundException("authorId", "There is no author with this ID"));
                 book.setAuthor(bookAuthor);

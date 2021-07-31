@@ -25,10 +25,10 @@ public class AuthorService {
         this.bookRepository = bookRepository;
     }
 
-    public ResponseEntity<Page<Author>> getAllBooksPaginated(String searchQuery, int page, int size, String sortBy, boolean ascending) {
+    public ResponseEntity<Page<Author>> getAllAuthorsPaginated(String searchQuery, int page, int size, String sortBy, boolean ascending) {
         Page<Author> authors;
 
-        if (searchQuery.equals(""))
+        if (searchQuery == null || searchQuery.equals(""))
             return ResponseEntity.ok().body(findAllPaginated(page, size, sortBy, ascending));
         else
             return ResponseEntity.ok().body(searchAllPaginated(searchQuery, page, size, sortBy, ascending));
