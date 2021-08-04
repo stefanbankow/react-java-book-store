@@ -1,9 +1,14 @@
 package com.bankov.bookstorebackend.models;
 
-import lombok.*;
+import com.bankov.bookstorebackend.models.listeners.BookEventListener;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
+@EntityListeners(BookEventListener.class)
 @Entity
 @Data
 @NoArgsConstructor
@@ -24,15 +29,6 @@ public class Book {
     @ManyToOne
     @JoinColumn(name = "author_id")
     private Author author;
-
-    public Book(String title, String description, String coverArtURL, Integer price, Integer yearOfRelease, Boolean forSale) {
-        this.title = title;
-        this.description = description;
-        this.coverArtURL = coverArtURL;
-        this.price = price;
-        this.yearOfRelease = yearOfRelease;
-        this.forSale = forSale;
-    }
 
     public void updateWith(Book book) {
         this.title = book.title;
