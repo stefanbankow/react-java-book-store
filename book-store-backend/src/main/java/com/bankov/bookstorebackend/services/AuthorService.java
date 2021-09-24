@@ -1,32 +1,45 @@
 package com.bankov.bookstorebackend.services;
 
+import com.bankov.bookstorebackend.exceptions.FileIsNotImageException;
 import com.bankov.bookstorebackend.models.Author;
 import com.bankov.bookstorebackend.repositories.AuthorRepository;
 import com.bankov.bookstorebackend.repositories.BookRepository;
+import com.bankov.bookstorebackend.util.images.ImageUtils;
+import com.bankov.bookstorebackend.util.images.uploaders.AuthorImageUploader;
+import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.servlet.ServletContext;
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.net.URI;
 import java.util.Optional;
 
 @Service
 @Transactional
 public class AuthorService {
-    AuthorRepository repository;
-    BookRepository bookRepository;
+    private final AuthorRepository repository;
+    private final BookRepository bookRepository;
+    private final ServletContext servletContext;
 
-    public AuthorService(AuthorRepository repository, BookRepository bookRepository) {
+    @Value("${CLOUDINARY_URL}")
+    private String cloudinaryURL;
+
+
+    public AuthorService(AuthorRepository repository, BookRepository bookRepository, ServletContext servletContext) {
         this.repository = repository;
         this.bookRepository = bookRepository;
+        this.servletContext = servletContext;
     }
 
     public ResponseEntity<Page<Author>> getAllAuthorsPaginated(String searchQuery, int page, int size, String sortBy, boolean ascending) {
-        Page<Author> authors;
 
         if (searchQuery == null || searchQuery.equals(""))
             return ResponseEntity.ok().body(findAllPaginated(page, size, sortBy, ascending));
@@ -61,8 +74,13 @@ public class AuthorService {
         return repository.findById(id);
     }
 
-    public ResponseEntity<Author> createAuthor(Author author) {
-        Author newAuthor = create(author);
+    @SneakyThrows(IOException.class)
+    public ResponseEntity<Author> createAuthor(Author author, MultipartFile file) {
+        if (file != null && !ImageUtils.isImageFileBasedOnServletContext(file, servletContext)) {
+            throw new FileIsNotImageException("image", "File must be of type JPG/JPEG/PNG");
+        }
+
+        Author newAuthor = create(author, file);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(author.getId()).toUri();
@@ -70,19 +88,44 @@ public class AuthorService {
         return ResponseEntity.created(location).body(newAuthor);
     }
 
-    private Author create(Author author) {
+    private Author create(Author author, MultipartFile image) throws IOException {
+        if (image != null) {
+            AuthorImageUploader imageUploader = new AuthorImageUploader(cloudinaryURL);
+            String uploadedImageUrl = imageUploader.uploadNewImage(image);
+            author.setImageURL(uploadedImageUrl);
+
+        }
         return repository.save(author);
     }
 
-    public ResponseEntity<Author> updateAuthor(Long id, Author updatedAuthor) {
-        return ResponseEntity.of(update(id, updatedAuthor));
+    @SneakyThrows(IOException.class)
+    public ResponseEntity<Author> updateAuthor(Long id, Author updatedAuthor, MultipartFile file) {
+        if (file != null && !ImageUtils.isImageFileBasedOnServletContext(file, servletContext)) {
+            throw new FileIsNotImageException("image", "File must be of type JPG/JPEG/PNG");
+        }
+
+        return ResponseEntity.of(update(id, updatedAuthor, file));
     }
 
-    private Optional<Author> update(Long id, Author updatedAuthor) {
-        return repository.findById(id).map(author -> {
-            author.updateWith(updatedAuthor);
-            return repository.save(author);
-        });
+    private Optional<Author> update(Long id, Author updatedAuthor, MultipartFile image) throws IOException {
+
+        Optional<Author> optionalAuthor = repository.findById(id);
+
+        if (optionalAuthor.isPresent()) {
+            Author currentAuthor = optionalAuthor.get();
+            currentAuthor.replaceWithButKeepAuthorImage(updatedAuthor);
+
+            if (image != null) {
+                AuthorImageUploader authorImageUploader = new AuthorImageUploader(cloudinaryURL);
+                String uploadedImageURL = authorImageUploader.updateImage(image, currentAuthor.getImageURL());
+                currentAuthor.setImageURL(uploadedImageURL);
+            }
+
+            repository.save(currentAuthor);
+
+        }
+
+        return optionalAuthor;
     }
 
     public ResponseEntity<Author> deleteAuthor(Long id) {
@@ -95,7 +138,6 @@ public class AuthorService {
     }
 
     private void delete(Long id) {
-
         repository.findById(id).map(author -> {
             bookRepository.deleteAllByAuthor(author);
             repository.delete(author);
