@@ -1,6 +1,6 @@
 package com.bankov.bookstorebackend.controllers;
 
-import com.bankov.bookstorebackend.DTOs.CreateBookForm;
+import com.bankov.bookstorebackend.DTOs.BookRequestDTO;
 import com.bankov.bookstorebackend.exceptions.ResourceNotFoundException;
 import com.bankov.bookstorebackend.models.Book;
 import com.bankov.bookstorebackend.services.BookService;
@@ -39,7 +39,7 @@ public class BookController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('create:books')")
-    public ResponseEntity<Book> createBook(@Valid @RequestPart CreateBookForm book,
+    public ResponseEntity<Book> createBook(@Valid @RequestPart BookRequestDTO book,
                                            @RequestPart(required = false) MultipartFile image) {
         return service.createBook(book, image);
     }
@@ -47,7 +47,7 @@ public class BookController {
     @PatchMapping("/{id}")
     @PreAuthorize("hasAuthority('update:books')")
     public ResponseEntity<Book> updateBook(@PathVariable("id") Long id,
-                                           @Valid @RequestPart CreateBookForm book,
+                                           @Valid @RequestPart BookRequestDTO book,
                                            @RequestPart(required = false) MultipartFile image) {
         return service.updateBook(id, book, image);
     }

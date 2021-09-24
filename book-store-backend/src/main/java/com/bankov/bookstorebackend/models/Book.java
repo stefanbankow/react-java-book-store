@@ -30,10 +30,18 @@ public class Book {
     @JoinColumn(name = "author_id")
     private Author author;
 
-    public void updateWith(Book book) {
+    public void replaceWith(Book book) {
         this.title = book.title;
         this.description = book.description;
         this.coverArtURL = book.coverArtURL;
+        this.price = book.price;
+        this.yearOfRelease = book.yearOfRelease;
+        this.forSale = book.forSale;
+    }
+
+    public void replaceWithButKeepCoverArt(Book book) {
+        this.title = book.title;
+        this.description = book.description;
         this.price = book.price;
         this.yearOfRelease = book.yearOfRelease;
         this.forSale = book.forSale;

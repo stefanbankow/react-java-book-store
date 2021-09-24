@@ -1,16 +1,16 @@
 package com.bankov.bookstorebackend.services;
 
 
-import com.bankov.bookstorebackend.DTOs.CreateBookForm;
+import com.bankov.bookstorebackend.DTOs.BookRequestDTO;
 import com.bankov.bookstorebackend.exceptions.FileIsNotImageException;
 import com.bankov.bookstorebackend.exceptions.ResourceNotFoundException;
 import com.bankov.bookstorebackend.models.Author;
 import com.bankov.bookstorebackend.models.Book;
 import com.bankov.bookstorebackend.repositories.AuthorRepository;
 import com.bankov.bookstorebackend.repositories.BookRepository;
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
+import com.bankov.bookstorebackend.util.images.uploaders.BookImageUploader;
 import lombok.SneakyThrows;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,12 +22,12 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.ServletContext;
 import javax.transaction.Transactional;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+
+import static com.bankov.bookstorebackend.util.images.ImageUtils.isImageFileBasedOnServletContext;
 
 @Service
 @Transactional
@@ -82,16 +82,17 @@ public class BookService {
     }
 
     @SneakyThrows(IOException.class)
-    public ResponseEntity<Book> createBook(CreateBookForm book, MultipartFile file) {
-        if (file != null && isNotImageFile(file))
+    public ResponseEntity<Book> createBook(BookRequestDTO book, MultipartFile file) {
+        if (file != null && !isImageFileBasedOnServletContext(file, servletContext))
             throw new FileIsNotImageException("image", "File must be of type JPG/JPEG/PNG");
+
         Book newBook = create(book, file);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(newBook.getId()).toUri();
         return ResponseEntity.created(location).body(newBook);
     }
 
-    private Book create(CreateBookForm book, MultipartFile image) throws IOException {
+    private Book create(BookRequestDTO book, MultipartFile image) throws IOException {
         Long authorId = book.getAuthorId();
         Book newBook = book.toBook();
         if (authorId != null) {
@@ -101,71 +102,51 @@ public class BookService {
         }
 
         if (image != null) {
-            Cloudinary cloudinary = new Cloudinary(cloudinaryURL);
+            BookImageUploader imageUploader = new BookImageUploader(cloudinaryURL);
+            String uploadedImageUrl = imageUploader.uploadNewImage(image);
+            newBook.setCoverArtURL(uploadedImageUrl);
 
-            File imageFile = File.createTempFile("image", image.getOriginalFilename());
-            image.transferTo(imageFile);
-
-            @SuppressWarnings("rawtypes")
-            Map imageResponse = cloudinary.uploader().upload(imageFile, ObjectUtils.asMap("folder", "book_covers"));
-
-            newBook.setCoverArtURL(imageResponse.get("url").toString());
         }
         bookRepository.save(newBook);
         return newBook;
     }
 
-    @SneakyThrows
-    public ResponseEntity<Book> updateBook(Long id, CreateBookForm newBook, MultipartFile image) {
-        if (image != null && isNotImageFile(image))
+    @SneakyThrows(IOException.class)
+    public ResponseEntity<Book> updateBook(Long id, BookRequestDTO newBook, MultipartFile image) {
+        if (image != null && !isImageFileBasedOnServletContext(image, servletContext))
             throw new FileIsNotImageException("image", "File must be of type JPG/JPEG/PNG");
         return ResponseEntity.of(update(id, newBook, image));
     }
 
-    private Optional<Book> update(Long id, CreateBookForm newBook, MultipartFile image) throws IOException {
+    private Optional<Book> update(Long id, BookRequestDTO newBook, MultipartFile image) throws IOException {
 
         Optional<Book> optionalBook = bookRepository.findById(id);
 
-
         if (optionalBook.isPresent()) {
-            Book bookObj = optionalBook.get();
-            String oldCoverArtURL = bookObj.getCoverArtURL();
-            if (!Objects.equals(newBook.getAuthorId(), bookObj.getAuthor().getId())) {
-                Author bookAuthor = authorRepository.findById(newBook.getAuthorId())
-                        .orElseThrow(() -> new ResourceNotFoundException("authorId", "There is no author with this ID"));
-                bookObj.setAuthor(bookAuthor);
-            }
-            bookObj.updateWith(newBook.toBook());
-
-
-            //!!!!Have to manually set the old URL again since the request DTO
-            //does not include a field for the coverArtURL and creates a book object without it
-            bookObj.setCoverArtURL(oldCoverArtURL);
-
+            Book updatedBook = updateBookFieldsWithBookDTO(newBook, optionalBook.get());
 
             if (image != null) {
-                Cloudinary cloudinary = new Cloudinary(cloudinaryURL);
-
-                if (oldCoverArtURL != null) {
-                    try {
-                        cloudinary.api().deleteAllResources(ObjectUtils.asMap("url", bookObj.getCoverArtURL()));
-                    } catch (Exception e) {
-                        throw new IOException(e.getMessage());
-                    }
-                }
-
-                File imageFile = File.createTempFile("image", image.getOriginalFilename());
-                image.transferTo(imageFile);
-
-                @SuppressWarnings("rawtypes")
-                Map imageResponse = cloudinary.uploader().upload(imageFile, ObjectUtils.asMap("folder", "book_covers"));
-                bookObj.setCoverArtURL(imageResponse.get("url").toString());
+                BookImageUploader imageUploader = new BookImageUploader(cloudinaryURL);
+                String uploadedImageUrl = imageUploader.updateImage(image, updatedBook.getCoverArtURL());
+                updatedBook.setCoverArtURL(uploadedImageUrl);
             }
 
-            bookRepository.save(bookObj);
+            bookRepository.save(updatedBook);
         }
 
         return optionalBook;
+    }
+
+    @NotNull
+    private Book updateBookFieldsWithBookDTO(BookRequestDTO newBook, Book currentBook) {
+        if (!Objects.equals(newBook.getAuthorId(), currentBook.getAuthor().getId())) {
+            Author bookAuthor = authorRepository.findById(newBook.getAuthorId())
+                    .orElseThrow(() -> new ResourceNotFoundException("authorId", "There is no author with this ID"));
+            currentBook.setAuthor(bookAuthor);
+        }
+        currentBook.replaceWithButKeepCoverArt(newBook.toBook());
+
+        return currentBook;
     }
 
     public ResponseEntity<Book> deleteBook(Long id) {
