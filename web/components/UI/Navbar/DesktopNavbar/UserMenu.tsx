@@ -1,4 +1,4 @@
-import { UserProfile } from "@auth0/nextjs-auth0";
+import { User } from "@auth0/auth0-react";
 import {
   Icon,
   Menu,
@@ -14,11 +14,12 @@ import { FiChevronDown, FiServer, FiLogOut, FiUser } from "react-icons/fi";
 import styles from "../../../../styles/AnimatedUnderlineLink.module.css";
 
 export interface IUserMenuProps {
-  user: UserProfile;
+  user: User;
   isAdmin: boolean;
+  logout: () => void;
 }
 
-export default function UserMenu({ user, isAdmin }: IUserMenuProps) {
+export default function UserMenu({ user, isAdmin, logout }: IUserMenuProps) {
   const router = useRouter();
   return (
     <Menu placement="bottom">
@@ -45,10 +46,7 @@ export default function UserMenu({ user, isAdmin }: IUserMenuProps) {
             Profile
           </MenuItem>
 
-          <MenuItem
-            icon={<Icon as={FiLogOut} />}
-            onClick={() => router.push("/api/auth/logout")}
-          >
+          <MenuItem icon={<Icon as={FiLogOut} />} onClick={() => logout()}>
             Logout
           </MenuItem>
         </MenuGroup>

@@ -1,3 +1,4 @@
+import { useAuth0 } from "@auth0/auth0-react";
 import {
   Button,
   Checkbox,
@@ -15,6 +16,7 @@ import {
 import { Field, FieldProps, Form, Formik, FormikHelpers } from "formik";
 import React, { useState } from "react";
 import { BookProps } from "../../../../../types/BookTypes";
+import ChakraFormikFileUpload from "../../../Forms/ChakraFormikFileUpload";
 import ChakraFormikFormField from "../../../Forms/ChakraFormikFormField";
 import ChakraFormikNumberInput from "../../../Forms/ChakraFormikNumberInput";
 import ChakraFormikTextArea from "../../../Forms/ChakraFormikTextArea";
@@ -36,13 +38,15 @@ export default function CreateOrUpdateBookModal({
 }: ICreateOrUpdateBookModalProps) {
   const isCreateModal = type === "create";
   const [isLoading, setIsLoading] = useState(false);
+  const { getAccessTokenSilently } = useAuth0();
+
   const initialValues = isCreateModal
     ? {
         title: undefined,
         description: undefined,
         forSale: true,
         price: undefined,
-        coverArtURL: undefined,
+        image: undefined,
         yearOfRelease: undefined,
         authorId: undefined,
       }
@@ -51,7 +55,7 @@ export default function CreateOrUpdateBookModal({
         description: currentBook?.description,
         forSale: currentBook?.forSale,
         price: currentBook?.price,
-        coverArtURL: currentBook?.coverArtURL,
+        image: currentBook?.coverArtURL,
         yearOfRelease: currentBook?.yearOfRelease,
         authorId: currentBook?.author.id,
       };
@@ -62,27 +66,44 @@ export default function CreateOrUpdateBookModal({
     requestType: "POST" | "PATCH"
   ) => {
     try {
+      let accessToken = await getAccessTokenSilently();
+      let formData = new FormData();
+
+      if (values.image) {
+        formData.append("image", values.image!);
+      }
+      delete values.image;
+
+      formData.append(
+        "book",
+        new Blob([JSON.stringify(values)], {
+          type: "application/json",
+        })
+      );
+
       const response = await fetch(
         requestType === "POST"
-          ? "http://localhost:3000/api/store/books"
-          : `http://localhost:3000/api/store/books/${currentBook?.id}`,
+          ? "http://localhost:8080/api/store/books"
+          : `http://localhost:8080/api/store/books/${currentBook?.id}`,
         {
           method: requestType,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(values),
+          headers: {
+            authorization: `Bearer ${accessToken}`,
+          },
+          body: formData,
         }
       );
       if (response.ok || response.status === 204) {
         updateData();
         onClose();
-      } else if (response.status === 400) {
-        const data = await response.json();
-        actions.setErrors(data);
       } else {
         const data = await response.json();
-        actions.setStatus({ error: data.error });
+        actions.setErrors(
+          response.status === 400 ? data : { error: data.error }
+        );
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error(error);
       actions.setStatus({ error: error.message });
     }
   };
@@ -147,11 +168,12 @@ export default function CreateOrUpdateBookModal({
                     step={1}
                   />
 
-                  <ChakraFormikFormField
-                    isRequired
-                    fieldName="coverArtURL"
-                    label="Cover Art URL"
+                  <ChakraFormikFileUpload
+                    accept="image/*"
+                    fieldName="image"
+                    label="Book Image"
                   />
+
                   <ChakraFormikNumberInput
                     isRequired
                     fieldName="authorId"
