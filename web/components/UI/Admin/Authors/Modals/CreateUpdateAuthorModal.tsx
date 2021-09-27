@@ -151,8 +151,8 @@ export default function CreateOrUpdateAuthorModal({
                     accept="image/*"
                     fieldName="image"
                     label="Author Image"
+                    externalFileUrl={currentAuthor?.imageURL}
                   />
-
                   {status && (
                     <Box textAlign="center" w="100%">
                       <Text align="center" mx="auto" color="red">

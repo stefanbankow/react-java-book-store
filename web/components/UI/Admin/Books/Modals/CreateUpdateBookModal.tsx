@@ -172,6 +172,7 @@ export default function CreateOrUpdateBookModal({
                     accept="image/*"
                     fieldName="image"
                     label="Book Image"
+                    externalFileUrl={currentBook?.coverArtURL}
                   />
 
                   <ChakraFormikNumberInput
