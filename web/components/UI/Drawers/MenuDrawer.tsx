@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Drawer,
   DrawerCloseButton,
@@ -16,7 +16,8 @@ import {
 } from "@chakra-ui/react";
 import NavbarLink from "../Navbar/DesktopNavbar/NavbarLink";
 import { FiLogOut, FiServer, FiUser } from "react-icons/fi";
-import { useUserWithRole } from "../../../lib/swrHooks";
+import { useAuth0 } from "@auth0/auth0-react";
+import { isUserAdmin } from "../../../lib/auth0util";
 
 export interface IMenuDrawerProps {
   isOpen: boolean;
@@ -29,7 +30,13 @@ export default function MenuDrawer({
   onClose,
   placement,
 }: IMenuDrawerProps) {
-  const { isLoading, data } = useUserWithRole();
+  const { isLoading, user } = useAuth0();
+
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    setIsAdmin(isUserAdmin(user));
+  }, [user]);
 
   const spacing = 3;
 
@@ -61,10 +68,10 @@ export default function MenuDrawer({
             <Spacer />
             <Divider orientation="horizontal" />
             <Spacer />
-            {isLoading ? null : data?.user ? (
+            {isLoading ? null : user ? (
               <>
-                <Text fontWeight="bold">{data.user.name}</Text>
-                {data.isAdmin && (
+                <Text fontWeight="bold">{user.name}</Text>
+                {isAdmin && (
                   <NavbarLink link="/admin" onClick={onClose}>
                     <HStack as="text">
                       <Icon as={FiServer} />

@@ -1,3 +1,4 @@
+import { useAuth0 } from "@auth0/auth0-react";
 import {
   Flex,
   Center,
@@ -16,7 +17,7 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import AdminTabPanel from "../../components/UI/Admin/AdminTabPanel";
 import MyErrorMessage from "../../components/UI/MyErrorMessage";
-import { useUserWithRole } from "../../lib/swrHooks";
+import { isUserAdmin } from "../../lib/auth0util";
 
 export interface IAdminTabProps {}
 
@@ -42,7 +43,7 @@ export default function AdminTab({}: IAdminTabProps) {
     }
   }, [router.query.adminTab]);
 
-  const { data, error, isLoading } = useUserWithRole();
+  const { user, error, isLoading } = useAuth0();
   let pageData;
 
   const handleTabChange = (index: number) => {
@@ -69,13 +70,13 @@ export default function AdminTab({}: IAdminTabProps) {
         h="80vh"
       >
         <MyErrorMessage
-          status={error.status}
+          status={500}
           message="There was an error when trying to verify your user role!"
         />
       </Center>
     );
   } else {
-    if (data.isAdmin)
+    if (isUserAdmin(user!))
       pageData = (
         <>
           <Heading textAlign={{ base: "center", md: "left" }} my="10">

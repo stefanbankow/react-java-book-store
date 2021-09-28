@@ -4,9 +4,8 @@ import {
   SimpleGrid,
   HStack,
   UseDisclosureProps,
-  Text,
 } from "@chakra-ui/react";
-import * as React from "react";
+import React, { useState, useEffect } from "react";
 import HomePageLink from "../HomePageLink";
 import NavbarLink from "./NavbarLink";
 import MyDivider from "../../Divider";
@@ -14,15 +13,21 @@ import { useAppSelector } from "../../../../redux/hooks";
 
 import UserMenu from "./UserMenu";
 
-import styles from "../../../../styles/AnimatedUnderlineLink.module.css";
-import { useUserWithRole } from "../../../../lib/swrHooks";
+import { useAuth0 } from "@auth0/auth0-react";
+import NavbarButton from "../NavbarButton";
+import { isUserAdmin } from "../../../../lib/auth0util";
 
 export interface IDesktopNavbarProps {
   cartStatus: UseDisclosureProps;
 }
 
 export default function DesktopNavbar({ cartStatus }: IDesktopNavbarProps) {
-  const { isLoading, data } = useUserWithRole();
+  const { user, isLoading, loginWithRedirect, logout } = useAuth0();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    setIsAdmin(isUserAdmin(user));
+  }, [user]);
 
   const items = useAppSelector((state) => state.cart.items);
   return (
@@ -58,19 +63,21 @@ export default function DesktopNavbar({ cartStatus }: IDesktopNavbarProps) {
         >
           {isLoading ? (
             <div />
-          ) : data && data.user ? (
-            <UserMenu user={data.user} isAdmin={data.isAdmin} />
+          ) : user ? (
+            <UserMenu user={user} isAdmin={isAdmin} logout={logout} />
           ) : (
-            <>
-              <NavbarLink link="/api/auth/login">Sign in / Sign up</NavbarLink>
-            </>
+            <NavbarButton
+              text="Sign in/Sign up"
+              ariaLabel="desktop_sign_in_button"
+              onClick={loginWithRedirect}
+            />
           )}
           <MyDivider width="1px" orientation="vertical" />
-          <Box as="button" aria-label="desktop_cart_button">
-            <a onClick={cartStatus.onOpen} className={styles.navbarLink}>
-              <Text textAlign="center">Cart {items.length}</Text>
-            </a>
-          </Box>
+          <NavbarButton
+            text={`Cart ${items.length}`}
+            ariaLabel="desktop_cart_button"
+            onClick={cartStatus.onOpen}
+          />
         </HStack>
       </SimpleGrid>
     </Flex>

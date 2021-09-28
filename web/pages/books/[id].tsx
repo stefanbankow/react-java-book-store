@@ -28,7 +28,10 @@ import { addItem } from "../../redux/slices/cartSlice";
 import { fetcher } from "../../lib/fetcher";
 
 function useSingleBook(id?: string | string[] | number) {
-  const { data, error } = useSWR(() => `/api/store/books/${id}`, fetcher);
+  const { data, error } = useSWR(
+    () => `http://localhost:8080/api/store/books/${id}`,
+    fetcher
+  );
 
   return {
     data: data as BookProps,

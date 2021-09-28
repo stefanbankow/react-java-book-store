@@ -2,6 +2,12 @@ import { createEntity } from "./../../../../lib/api/entityRequests";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getAllEntities } from "../../../../lib/api/entityRequests";
 
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 export default async function booksRequest(
   req: NextApiRequest,
   res: NextApiResponse

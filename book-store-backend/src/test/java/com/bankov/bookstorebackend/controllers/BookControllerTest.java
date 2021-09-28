@@ -1,6 +1,7 @@
 package com.bankov.bookstorebackend.controllers;
 
-import com.bankov.bookstorebackend.DTOs.CreateBookForm;
+import com.bankov.bookstorebackend.DTOs.BookRequestDTO;
+import com.bankov.bookstorebackend.exceptions.FileIsNotImageException;
 import com.bankov.bookstorebackend.exceptions.ResourceNotFoundException;
 import com.bankov.bookstorebackend.models.Author;
 import com.bankov.bookstorebackend.models.Book;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -25,6 +27,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static com.bankov.bookstorebackend.controllers.ControllerTestUtils.getMultipartFileFromBookRequestDTO;
+import static com.bankov.bookstorebackend.controllers.ControllerTestUtils.patchMultipartPostProcessor;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -35,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(BookController.class)
 @AutoConfigureMockMvc
 public class BookControllerTest {
+
     Author AUTHOR_1 = new Author(1L, "Author 1", "Description of Author 1",
             null, 1990, null);
     Author AUTHOR_2 = new Author(2L, "Author 2", "This description is longer",
@@ -45,21 +50,26 @@ public class BookControllerTest {
             null, 1599, 1965, false, AUTHOR_1);
     Book BOOK_3 = new Book(3L, "Book 3", "Desc of book 3",
             null, 2099, 1667, true, AUTHOR_2);
-    CreateBookForm newBookRequestBody = new CreateBookForm("POST Test Book", "This book should be created successfully",
-            null, 2099, 2021, true, 2L);
-    CreateBookForm updatedBookRequestBody = new CreateBookForm("Updated book Test",
+
+    BookRequestDTO NEW_BOOK_DTO = new BookRequestDTO("POST Test Book",
+            "This book should be created successfully", 2099, 2021, true, 2L);
+    BookRequestDTO UPDATED_BOOK_DTO = new BookRequestDTO("Updated book Test",
             "This description was successfully updated while testing",
-            null, 2099, 2010, true, 1L);
+            2099, 2010, true, 1L);
+
+
+    MockMultipartFile MOCK_IMAGE = new MockMultipartFile("image", "image".getBytes());
 
 
     @Autowired
     private MockMvc mockMvc;
 
+    @MockBean
+    private BookService bookService;
+
     @Autowired
     private ObjectMapper mapper;
 
-    @MockBean
-    private BookService bookService;
 
     @Test
     public void getBooksSortedById_success() throws Exception {
@@ -106,17 +116,18 @@ public class BookControllerTest {
     @Test
     @WithMockUser(username = "admin_test", authorities = {"create:books"})
     public void createBook_success() throws Exception {
-        Book newBook = newBookRequestBody.toBook();
+        Book newBook = NEW_BOOK_DTO.toBook();
         newBook.setAuthor(AUTHOR_2);
 
-        Mockito.when(bookService.postBook(newBookRequestBody))
+        Mockito.when(bookService.createBook(NEW_BOOK_DTO, MOCK_IMAGE))
                 .thenReturn(ResponseEntity.created(URI.create("/api/store/books/4")).body(newBook));
 
-        mockMvc.perform(post("/api/store/books")
+        mockMvc.perform(multipart("/api/store/books")
+                        .file(getMultipartFileFromBookRequestDTO(NEW_BOOK_DTO, mapper))
+                        .file(MOCK_IMAGE)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(this.mapper.writeValueAsString(newBookRequestBody)))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.title", is("POST Test Book")))
@@ -129,19 +140,65 @@ public class BookControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "admin_test", authorities = {"create:books"})
+    public void createBook_badRequest() throws Exception {
+        BookRequestDTO badRequestBody = new BookRequestDTO("Bad request",
+                "This book should not be created because it doesn't have a price",
+                null, 2010, true, 1L);
+
+        Book badRequestBook = badRequestBody.toBook();
+        badRequestBook.setAuthor(AUTHOR_1);
+
+        Mockito.when(bookService.createBook(badRequestBody, null))
+                .thenReturn(ResponseEntity.created(URI.create("/api/store/books/4")).body(badRequestBook));
+
+
+        mockMvc.perform(multipart("/api/store/books")
+                        .file(getMultipartFileFromBookRequestDTO(badRequestBody, mapper))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.price", is("Book must have a price")));
+    }
+
+    @Test
+    @WithMockUser(username = "admin_test", authorities = {"create:books"})
+    public void createBook_fileNotImage() throws Exception {
+        Book newBook = NEW_BOOK_DTO.toBook();
+        newBook.setAuthor(AUTHOR_2);
+
+        MockMultipartFile mockTextFile = new MockMultipartFile("image", "textFile.txt",
+                "text/plain", "random text".getBytes());
+
+        Mockito.when(bookService.createBook(NEW_BOOK_DTO, mockTextFile))
+                .thenThrow(new FileIsNotImageException("image", "File must be of type JPG/JPEG/PNG"));
+
+        mockMvc.perform(multipart("/api/store/books")
+                        .file(getMultipartFileFromBookRequestDTO(NEW_BOOK_DTO, mapper))
+                        .file(mockTextFile)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.image", is("File must be of type JPG/JPEG/PNG")));
+    }
+
+    @Test
     public void createBook_isUnauthorized() throws Exception {
-        Book newBook = newBookRequestBody.toBook();
+        Book newBook = NEW_BOOK_DTO.toBook();
         newBook.setAuthor(AUTHOR_1);
 
-        Mockito.when(bookService.postBook(newBookRequestBody))
+        Mockito.when(bookService.createBook(NEW_BOOK_DTO, null))
                 .thenReturn(ResponseEntity.created(URI.create("/api/store/books/4")).body(newBook));
 
 
-        mockMvc.perform(post("/api/store/books")
+        mockMvc.perform(multipart("/api/store/books")
+                        .file(getMultipartFileFromBookRequestDTO(NEW_BOOK_DTO, mapper))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(this.mapper.writeValueAsString(newBookRequestBody)))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
     }
@@ -149,61 +206,37 @@ public class BookControllerTest {
     @Test
     @WithMockUser("basic_user")
     public void createBook_isForbidden() throws Exception {
-        Book newBook = newBookRequestBody.toBook();
+        Book newBook = NEW_BOOK_DTO.toBook();
         newBook.setAuthor(AUTHOR_1);
 
-        Mockito.when(bookService.postBook(newBookRequestBody))
+        Mockito.when(bookService.createBook(NEW_BOOK_DTO, null))
                 .thenReturn(ResponseEntity.created(URI.create("/api/store/books/4")).body(newBook));
 
 
-        mockMvc.perform(post("/api/store/books")
+        mockMvc.perform(multipart("/api/store/books")
+                        .file(getMultipartFileFromBookRequestDTO(NEW_BOOK_DTO, mapper))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(this.mapper.writeValueAsString(newBookRequestBody)))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isForbidden());
-    }
-
-
-    @Test
-    @WithMockUser(username = "admin_test", authorities = {"create:books"})
-    public void createBook_badRequest() throws Exception {
-        CreateBookForm requestBody = new CreateBookForm("Bad request",
-                "This book should not be created because it doesn't have a price",
-                null, null, 2010, true, 1L);
-
-        Book newBook = requestBody.toBook();
-        newBook.setAuthor(AUTHOR_1);
-
-        Mockito.when(bookService.postBook(requestBody))
-                .thenReturn(ResponseEntity.created(URI.create("/api/store/books/4")).body(newBook));
-
-
-        mockMvc.perform(post("/api/store/books")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(this.mapper.writeValueAsString(requestBody)))
-                .andDo(print())
-                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.price", is("Book must have a price")));
     }
 
     @Test
     @WithMockUser(username = "admin_test", authorities = {"update:books"})
     public void updateBook_success() throws Exception {
-        Book updatedBook = updatedBookRequestBody.toBook();
+        Book updatedBook = UPDATED_BOOK_DTO.toBook();
         updatedBook.setAuthor(AUTHOR_1);
 
-
-        Mockito.when(bookService.updateBook(BOOK_3.getId(), updatedBookRequestBody))
+        Mockito.when(bookService.updateBook(BOOK_3.getId(), UPDATED_BOOK_DTO, MOCK_IMAGE))
                 .thenReturn(ResponseEntity.of(Optional.of(updatedBook)));
 
-        mockMvc.perform(patch("/api/store/books/3")
-                        .with(csrf())
+        mockMvc.perform(multipart("/api/store/books/3")
+                        .file(getMultipartFileFromBookRequestDTO(UPDATED_BOOK_DTO, mapper))
+                        .file(MOCK_IMAGE)
+                        .with(csrf()).with(patchMultipartPostProcessor)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(this.mapper.writeValueAsString(updatedBookRequestBody)))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title", is("Updated book Test")))
@@ -216,61 +249,25 @@ public class BookControllerTest {
     }
 
     @Test
-    public void updateBook_isUnauthorized() throws Exception {
-        Book updatedBook = updatedBookRequestBody.toBook();
-        updatedBook.setAuthor(AUTHOR_1);
-
-
-        Mockito.when(bookService.updateBook(BOOK_3.getId(), updatedBookRequestBody))
-                .thenReturn(ResponseEntity.of(Optional.of(updatedBook)));
-
-        mockMvc.perform(patch("/api/store/books/3")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(this.mapper.writeValueAsString(updatedBookRequestBody)))
-                .andDo(print())
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @WithMockUser("basic_user")
-    public void updateBook_isForbidden() throws Exception {
-        Book updatedBook = updatedBookRequestBody.toBook();
-        updatedBook.setAuthor(AUTHOR_1);
-
-
-        Mockito.when(bookService.updateBook(BOOK_3.getId(), updatedBookRequestBody))
-                .thenReturn(ResponseEntity.of(Optional.of(updatedBook)));
-
-        mockMvc.perform(patch("/api/store/books/3")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(this.mapper.writeValueAsString(updatedBookRequestBody)))
-                .andDo(print())
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
     @WithMockUser(username = "admin_test", authorities = {"create:books"})
     public void updateBook_badRequest() throws Exception {
-        CreateBookForm requestBody = new CreateBookForm(null,
+        BookRequestDTO badRequestBody = new BookRequestDTO(null,
                 "This book should not be updated, because the request is invalid",
-                null, null, 2010, true, 2L);
+                null, 2010, true, 2L);
 
-        Book newBook = requestBody.toBook();
+        Book newBook = badRequestBody.toBook();
         newBook.setAuthor(AUTHOR_2);
 
-        Mockito.when(bookService.updateBook(2L, requestBody))
+        Mockito.when(bookService.updateBook(2L, badRequestBody, MOCK_IMAGE))
                 .thenReturn(ResponseEntity.of(Optional.of(newBook)));
 
 
-        mockMvc.perform(patch("/api/store/books/2")
-                        .with(csrf())
+        mockMvc.perform(multipart("/api/store/books/2")
+                        .file(getMultipartFileFromBookRequestDTO(badRequestBody, mapper))
+                        .file(MOCK_IMAGE)
+                        .with(csrf()).with(patchMultipartPostProcessor)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(this.mapper.writeValueAsString(requestBody)))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title", is("Book must have a title")))
@@ -279,20 +276,40 @@ public class BookControllerTest {
 
     @Test
     @WithMockUser(username = "admin_test", authorities = {"update:books"})
+    public void updateBook_fileNotImage() throws Exception {
+        MockMultipartFile mockTextFile = new MockMultipartFile("image", "textFile.txt",
+                "text/plain", "random text".getBytes());
+
+        Mockito.when(bookService.updateBook(2L, UPDATED_BOOK_DTO, mockTextFile))
+                .thenThrow(new FileIsNotImageException("image", "File must be of type JPG/JPEG/PNG"));
+
+        mockMvc.perform(multipart("/api/store/books/2")
+                        .file(getMultipartFileFromBookRequestDTO(UPDATED_BOOK_DTO, mapper))
+                        .file(mockTextFile)
+                        .with(csrf())
+                        .with(patchMultipartPostProcessor)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.image", is("File must be of type JPG/JPEG/PNG")));
+    }
+
+    @Test
+    @WithMockUser(username = "admin_test", authorities = {"update:books"})
     public void updateBook_invalidBookID() throws Exception {
-        Book newBook = updatedBookRequestBody.toBook();
-        newBook.setAuthor(AUTHOR_2);
 
-
-        Mockito.when(bookService.updateBook(4L, updatedBookRequestBody))
+        Mockito.when(bookService.updateBook(4L, UPDATED_BOOK_DTO, MOCK_IMAGE))
                 .thenReturn(ResponseEntity.of(Optional.empty()));
 
 
-        mockMvc.perform(patch("/api/store/books/4")
+        mockMvc.perform(multipart("/api/store/books/4")
+                        .file(getMultipartFileFromBookRequestDTO(UPDATED_BOOK_DTO, mapper))
+                        .file(MOCK_IMAGE)
                         .with(csrf())
+                        .with(patchMultipartPostProcessor)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(this.mapper.writeValueAsString(updatedBookRequestBody)))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
@@ -300,27 +317,68 @@ public class BookControllerTest {
     @Test
     @WithMockUser(username = "admin_test", authorities = {"update:books"})
     public void updateBook_invalidAuthorID() throws Exception {
-        CreateBookForm requestBody = new CreateBookForm("Invalid ID Book",
+        BookRequestDTO requestBodyWithInvalidAuthorId = new BookRequestDTO("Invalid ID Book",
                 "This book should not be updated, because the provided author ID is invalid",
-                null, 599, 2010, true, 4L);
-
-        Book newBook = requestBody.toBook();
-        newBook.setAuthor(AUTHOR_2);
+                599, 2010, true, 4L);
 
 
-        Mockito.when(bookService.updateBook(BOOK_2.getId(), requestBody))
+        Mockito.when(bookService.updateBook(BOOK_2.getId(), requestBodyWithInvalidAuthorId, MOCK_IMAGE))
                 .thenThrow(new ResourceNotFoundException("authorId", "There is no author with this ID"));
 
 
-        mockMvc.perform(patch("/api/store/books/2")
-                        .with(csrf())
+        mockMvc.perform(multipart("/api/store/books/2")
+                        .file(getMultipartFileFromBookRequestDTO(requestBodyWithInvalidAuthorId, mapper))
+                        .file(MOCK_IMAGE)
+                        .with(csrf()).with(patchMultipartPostProcessor)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(this.mapper.writeValueAsString(requestBody)))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.authorId", is("There is no author with this ID")));
     }
+
+    @Test
+    public void updateBook_isUnauthorized() throws Exception {
+        Book updatedBook = UPDATED_BOOK_DTO.toBook();
+        updatedBook.setAuthor(AUTHOR_1);
+
+        MockMultipartFile updatedBookJSON = new MockMultipartFile("book", "book.txt",
+                "application/json", mapper.writeValueAsString(UPDATED_BOOK_DTO).getBytes());
+
+
+        Mockito.when(bookService.updateBook(BOOK_3.getId(), UPDATED_BOOK_DTO, MOCK_IMAGE))
+                .thenReturn(ResponseEntity.of(Optional.of(updatedBook)));
+
+
+        mockMvc.perform(multipart("/api/store/books/3").file(MOCK_IMAGE).file(updatedBookJSON)
+                        .with(csrf()).with(patchMultipartPostProcessor)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser("basic_user")
+    public void updateBook_isForbidden() throws Exception {
+        Book updatedBook = UPDATED_BOOK_DTO.toBook();
+        updatedBook.setAuthor(AUTHOR_1);
+
+        MockMultipartFile updatedBookJSON = new MockMultipartFile("book", "book.txt",
+                "application/json", mapper.writeValueAsString(UPDATED_BOOK_DTO).getBytes());
+
+
+        Mockito.when(bookService.updateBook(BOOK_3.getId(), UPDATED_BOOK_DTO, MOCK_IMAGE))
+                .thenReturn(ResponseEntity.of(Optional.of(updatedBook)));
+
+        mockMvc.perform(multipart("/api/store/books/3").file(MOCK_IMAGE).file(updatedBookJSON)
+                        .with(csrf()).with(patchMultipartPostProcessor)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
 
     @Test
     @WithMockUser(username = "admin_test", authorities = {"delete:books"})

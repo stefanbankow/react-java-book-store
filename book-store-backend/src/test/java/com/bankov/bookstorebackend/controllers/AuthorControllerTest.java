@@ -1,5 +1,6 @@
 package com.bankov.bookstorebackend.controllers;
 
+import com.bankov.bookstorebackend.exceptions.FileIsNotImageException;
 import com.bankov.bookstorebackend.models.Author;
 import com.bankov.bookstorebackend.services.AuthorService;
 import com.bankov.bookstorebackend.services.BookService;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -22,6 +24,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static com.bankov.bookstorebackend.controllers.ControllerTestUtils.getMultipartFileFromAuthor;
+import static com.bankov.bookstorebackend.controllers.ControllerTestUtils.patchMultipartPostProcessor;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -30,13 +34,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AuthorController.class)
+@MockBean(BookService.class) //This is required because it lets Spring generate the right context for this class
 public class AuthorControllerTest {
     Author AUTHOR_1 = new Author(1L, "Author 1", "Description of Author 1",
             null, 1990, null);
     Author AUTHOR_2 = new Author(2L, "Author 2", "This description is longer",
             null, 1870, 1944);
 
-    Author newAuthor = Author.builder().id(3L)
+    Author NEW_AUTHOR = Author.builder().id(3L)
             .name("New Author")
             .description("Description of author created with POST request")
             .imageURL(null)
@@ -44,23 +49,22 @@ public class AuthorControllerTest {
             .yearOfDeath(null)
             .build();
 
-    Author updatedAuthor = Author.builder().id(2L)
+    Author UPDATED_AUTHOR = Author.builder().id(2L)
             .name("Updated Author")
             .description("Updated desc")
             .imageURL(null)
             .yearBorn(2000)
             .yearOfDeath(null)
             .build();
+
+    MockMultipartFile MOCK_IMAGE = new MockMultipartFile("image", "image".getBytes());
+
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper mapper;
     @MockBean
     private AuthorService authorService;
-    @MockBean
-    @SuppressWarnings("unused")
-    //This is required in order to generate the right context
-    private BookService bookService;
 
     @Test
     public void getAuthorsSortedById_success() throws Exception {
@@ -105,14 +109,16 @@ public class AuthorControllerTest {
     @Test
     @WithMockUser(username = "admin_test", authorities = {"create:authors"})
     public void createAuthor_success() throws Exception {
-        Mockito.when(authorService.createAuthor(newAuthor))
-                .thenReturn(ResponseEntity.created(URI.create("/api/store/authors/3")).body(newAuthor));
+        Mockito.when(authorService.createAuthor(NEW_AUTHOR, MOCK_IMAGE))
+                .thenReturn(ResponseEntity.created(URI.create("/api/store/authors/3")).body(NEW_AUTHOR));
 
-        mockMvc.perform(post("/api/store/authors")
+        mockMvc.perform(multipart("/api/store/authors")
+                        .file(MOCK_IMAGE)
+                        .file(getMultipartFileFromAuthor(NEW_AUTHOR, mapper))
                         .with(csrf())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(newAuthor)))
+                        .content(mapper.writeValueAsString(NEW_AUTHOR)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name", is("New Author")))
                 .andExpect(jsonPath("$.description", is("Description of author created with POST request")))
@@ -125,12 +131,14 @@ public class AuthorControllerTest {
     @Test
     @WithMockUser(username = "admin_test", authorities = {"create:authors"})
     public void createAuthor_badRequest() throws Exception {
-        Author badRequestAuthor = newAuthor;
+        Author badRequestAuthor = NEW_AUTHOR;
         badRequestAuthor.setName(null);
-        Mockito.when(authorService.createAuthor(badRequestAuthor))
+
+        Mockito.when(authorService.createAuthor(badRequestAuthor, null))
                 .thenReturn(ResponseEntity.created(URI.create("api/store/authors/3")).body(badRequestAuthor));
 
-        mockMvc.perform(post("/api/store/authors")
+        mockMvc.perform(multipart("/api/store/authors")
+                        .file(getMultipartFileFromAuthor(NEW_AUTHOR, mapper))
                         .with(csrf())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -140,43 +148,68 @@ public class AuthorControllerTest {
     }
 
     @Test
-    public void createAuthor_isUnauthorized() throws Exception {
-        Mockito.when(authorService.createAuthor(newAuthor))
-                .thenReturn(ResponseEntity.created(URI.create("api/store/authors/3")).body(newAuthor));
+    @WithMockUser(username = "admin_test", authorities = {"create:authors"})
+    public void createAuthor_fileNotImage() throws Exception {
+        MockMultipartFile mockTextFile = new MockMultipartFile("image", "textFile.txt",
+                "text/plain", "random text".getBytes());
 
-        mockMvc.perform(post("/api/store/authors")
+        Mockito.when(authorService.createAuthor(NEW_AUTHOR, mockTextFile))
+                .thenThrow(new FileIsNotImageException("image", "File must be of type JPG/JPEG/PNG"));
+
+        mockMvc.perform(multipart("/api/store/authors")
+                        .file(getMultipartFileFromAuthor(NEW_AUTHOR, mapper))
+                        .file(mockTextFile)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.image", is("File must be of type JPG/JPEG/PNG")));
+    }
+
+    @Test
+    public void createAuthor_isUnauthorized() throws Exception {
+        Mockito.when(authorService.createAuthor(NEW_AUTHOR, null))
+                .thenReturn(ResponseEntity.created(URI.create("api/store/authors/3")).body(NEW_AUTHOR));
+
+        mockMvc.perform(multipart("/api/store/authors")
+                        .file(getMultipartFileFromAuthor(NEW_AUTHOR, mapper))
                         .with(csrf())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(newAuthor)))
+                        .content(mapper.writeValueAsString(NEW_AUTHOR)))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     @WithMockUser("user_test")
     public void createAuthor_isForbidden() throws Exception {
-        Mockito.when(authorService.createAuthor(newAuthor))
-                .thenReturn(ResponseEntity.created(URI.create("api/store/authors/3")).body(newAuthor));
+        Mockito.when(authorService.createAuthor(NEW_AUTHOR, null))
+                .thenReturn(ResponseEntity.created(URI.create("api/store/authors/3")).body(NEW_AUTHOR));
 
-        mockMvc.perform(post("/api/store/authors")
+        mockMvc.perform(multipart("/api/store/authors")
+                        .file(getMultipartFileFromAuthor(NEW_AUTHOR, mapper))
                         .with(csrf())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(newAuthor)))
+                        .content(mapper.writeValueAsString(NEW_AUTHOR)))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     @WithMockUser(username = "admin_test", authorities = {"update:authors"})
     public void updateAuthor_success() throws Exception {
-        Mockito.when(authorService.updateAuthor(2L, updatedAuthor))
-                .thenReturn(ResponseEntity.of(Optional.of(updatedAuthor)));
+        Mockito.when(authorService.updateAuthor(2L, UPDATED_AUTHOR, MOCK_IMAGE))
+                .thenReturn(ResponseEntity.of(Optional.of(UPDATED_AUTHOR)));
 
-        mockMvc.perform(patch("/api/store/authors/2")
+        mockMvc.perform(multipart("/api/store/authors/2")
+                        .file(getMultipartFileFromAuthor(UPDATED_AUTHOR, mapper))
+                        .file(MOCK_IMAGE)
                         .with(csrf())
+                        .with(patchMultipartPostProcessor)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(updatedAuthor)))
+                        .content(mapper.writeValueAsString(UPDATED_AUTHOR)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is("Updated Author")))
                 .andExpect(jsonPath("$.description", is("Updated desc")))
@@ -191,58 +224,89 @@ public class AuthorControllerTest {
     @Test
     @WithMockUser(username = "admin_test", authorities = {"update:authors"})
     public void updateAuthor_badRequest() throws Exception {
-        Author badRequestAuthor = updatedAuthor;
+        Author badRequestAuthor = UPDATED_AUTHOR;
         badRequestAuthor.setName(null);
-        Mockito.when(authorService.updateAuthor(2L, updatedAuthor))
-                .thenReturn(ResponseEntity.of(Optional.of(updatedAuthor)));
 
-        mockMvc.perform(patch("/api/store/authors/2")
+
+        Mockito.when(authorService.updateAuthor(2L, badRequestAuthor, null))
+                .thenReturn(ResponseEntity.of(Optional.of(badRequestAuthor)));
+
+        mockMvc.perform(multipart("/api/store/authors/2")
+                        .file(getMultipartFileFromAuthor(badRequestAuthor, mapper))
                         .with(csrf())
+                        .with(patchMultipartPostProcessor)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(updatedAuthor)))
+                        .content(mapper.writeValueAsString(UPDATED_AUTHOR)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.name", is("Author must have a name")));
     }
 
     @Test
     @WithMockUser(username = "admin_test", authorities = {"update:authors"})
+    public void updateAuthor_fileNotImage() throws Exception {
+        MockMultipartFile mockTextFile = new MockMultipartFile("image", "textFile.txt",
+                "text/plain", "random text".getBytes());
+
+        Mockito.when(authorService.updateAuthor(2L, UPDATED_AUTHOR, mockTextFile))
+                .thenThrow(new FileIsNotImageException("image", "File must be of type JPG/JPEG/PNG"));
+
+        mockMvc.perform(multipart("/api/store/authors/2 ")
+                        .file(getMultipartFileFromAuthor(UPDATED_AUTHOR, mapper))
+                        .file(mockTextFile)
+                        .with(csrf())
+                        .with(patchMultipartPostProcessor)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.image", is("File must be of type JPG/JPEG/PNG")));
+    }
+
+    @Test
+    @WithMockUser(username = "admin_test", authorities = {"update:authors"})
     public void updateAuthor_invalidId() throws Exception {
-        Mockito.when(authorService.updateAuthor(4L, updatedAuthor))
+        Mockito.when(authorService.updateAuthor(4L, UPDATED_AUTHOR, null))
                 .thenReturn(ResponseEntity.of(Optional.empty()));
 
-        mockMvc.perform(patch("/api/store/authors/4")
+        mockMvc.perform(multipart("/api/store/authors/4")
+                        .file(getMultipartFileFromAuthor(UPDATED_AUTHOR, mapper))
                         .with(csrf())
+                        .with(patchMultipartPostProcessor)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(updatedAuthor)))
+                        .content(mapper.writeValueAsString(UPDATED_AUTHOR)))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     @WithMockUser("user_test")
     public void updateAuthor_isForbidden() throws Exception {
-        Mockito.when(authorService.updateAuthor(2L, updatedAuthor))
-                .thenReturn(ResponseEntity.of(Optional.of(updatedAuthor)));
+        Mockito.when(authorService.updateAuthor(2L, UPDATED_AUTHOR, null))
+                .thenReturn(ResponseEntity.of(Optional.of(UPDATED_AUTHOR)));
 
-        mockMvc.perform(patch("/api/store/authors/2")
+        mockMvc.perform(multipart("/api/store/authors/2")
+                        .file(getMultipartFileFromAuthor(UPDATED_AUTHOR, mapper))
                         .with(csrf())
+                        .with(patchMultipartPostProcessor)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(updatedAuthor)))
+                        .content(mapper.writeValueAsString(UPDATED_AUTHOR)))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     public void updateAuthor_isUnauthorized() throws Exception {
-        Mockito.when(authorService.updateAuthor(2L, updatedAuthor))
-                .thenReturn(ResponseEntity.of(Optional.of(updatedAuthor)));
+        Mockito.when(authorService.updateAuthor(2L, UPDATED_AUTHOR, null))
+                .thenReturn(ResponseEntity.of(Optional.of(UPDATED_AUTHOR)));
 
-        mockMvc.perform(patch("/api/store/authors/2")
+        mockMvc.perform(multipart("/api/store/authors/2")
+                        .file(getMultipartFileFromAuthor(UPDATED_AUTHOR, mapper))
                         .with(csrf())
+                        .with(patchMultipartPostProcessor)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(updatedAuthor)))
+                        .content(mapper.writeValueAsString(UPDATED_AUTHOR)))
                 .andExpect(status().isUnauthorized());
     }
 

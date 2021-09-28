@@ -1,3 +1,4 @@
+import { useAuth0 } from "@auth0/auth0-react";
 import {
   Modal,
   ModalOverlay,
@@ -30,23 +31,37 @@ export default function DeleteBookModal({
   const [error, setError] = useState<
     { message: string; status: number } | undefined
   >(undefined);
+
+  const { getAccessTokenSilently } = useAuth0();
   const [isLoading, setisLoading] = useState(false);
 
   const handleDeleteBook = async () => {
-    setisLoading(true);
-    const res = await fetch(`http://localhost:3000/api/store/books/${id}`, {
-      method: "DELETE",
-    });
-    if (res.status === 204) {
-      onClose();
-      updateData();
-    } else {
-      res
-        .json()
-        .then((data) => setError({ message: data.error, status: res.status }))
-        .catch((err) => setError({ message: err.message, status: res.status }));
+    try {
+      const accessToken = await getAccessTokenSilently();
+
+      setisLoading(true);
+      const res = await fetch(`http://localhost:8080/api/store/books/${id}`, {
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+        method: "DELETE",
+      });
+      if (res.status === 204) {
+        onClose();
+        updateData();
+      } else {
+        const errorData = await res.json();
+        setError({ message: errorData.error, status: res.status });
+      }
+      setisLoading(false);
+    } catch (err) {
+      console.error(err);
+      setError({
+        message:
+          "There was an unexpected server error while trying to delete the resource",
+        status: 500,
+      });
     }
-    setisLoading(false);
   };
   return (
     <Modal isOpen={isOpen} onClose={onClose}>

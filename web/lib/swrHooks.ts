@@ -1,4 +1,3 @@
-import { UserProfile } from "@auth0/nextjs-auth0";
 import useSWR from "swr";
 import { PaginatedAuthorsResponseProps } from "../types/AuthorTypes";
 import { PaginatedBooksResponseProps } from "../types/BookTypes";
@@ -12,9 +11,9 @@ export function useBooks(
   asc: string | string[] | undefined
 ) {
   const { data, error } = useSWR(
-    `/api/store/books?search=${search || ""}&page=${page || 0}&size=${
-      size || 24
-    }&sortBy=${sortBy || "id"}&asc=${asc || false}`,
+    `http://localhost:8080/api/store/books?search=${search || ""}&page=${
+      page || 0
+    }&size=${size || 24}&sortBy=${sortBy || "id"}&asc=${asc || false}`,
     fetcher
   );
 
@@ -36,9 +35,9 @@ export function useBooksAdmin(
 ) {
   const { data, error, mutate, isValidating } = useSWR(
     !isTyping
-      ? `/api/store/books?search=${search || ""}&page=${page || 0}&size=${
-          pageSize || 24
-        }&sortBy=${sortBy || "id"}&asc=${asc || false}`
+      ? `http://localhost:8080/api/store/books?search=${search || ""}&page=${
+          page || 0
+        }&size=${pageSize || 24}&sortBy=${sortBy || "id"}&asc=${asc || false}`
       : null,
     fetcher
   );
@@ -60,9 +59,9 @@ export function useAuthors(
   asc: string | string[] | undefined
 ) {
   const { data, error } = useSWR(
-    `/api/store/authors?search=${search || ""}&page=${page || 0}&size=${
-      size || 24
-    }&sortBy=${sortBy || "id"}&asc=${asc || false}`,
+    `http://localhost:8080/api/store/authors?search=${search || ""}&page=${
+      page || 0
+    }&size=${size || 24}&sortBy=${sortBy || "id"}&asc=${asc || false}`,
     fetcher
   );
 
@@ -83,9 +82,9 @@ export function useAuthorsAdmin(
 ) {
   const { data, error, mutate, isValidating } = useSWR(
     !isTyping
-      ? `/api/store/authors?search=${search || ""}&page=${page || 0}&size=${
-          pageSize || 24
-        }&sortBy=${sortBy || "id"}&asc=${asc || false}`
+      ? `http://localhost:8080/api/store/authors?search=${search || ""}&page=${
+          page || 0
+        }&size=${pageSize || 24}&sortBy=${sortBy || "id"}&asc=${asc || false}`
       : null,
     fetcher
   );
@@ -98,12 +97,3 @@ export function useAuthorsAdmin(
     isValidating,
   };
 }
-
-export const useUserWithRole = () => {
-  const { data, error } = useSWR("/api/auth/user", fetcher);
-  return {
-    data: data as { user: UserProfile; isAdmin: boolean },
-    error,
-    isLoading: !data && !error,
-  };
-};

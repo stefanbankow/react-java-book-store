@@ -1,3 +1,4 @@
+import { useAuth0 } from "@auth0/auth0-react";
 import {
   Button,
   Modal,
@@ -14,6 +15,7 @@ import {
 import { Form, Formik, FormikHelpers } from "formik";
 import React, { useState } from "react";
 import { AuthorProps } from "../../../../../types/AuthorTypes";
+import ChakraFormikFileUpload from "../../../Forms/ChakraFormikFileUpload";
 import ChakraFormikFormField from "../../../Forms/ChakraFormikFormField";
 import ChakraFormikNumberInput from "../../../Forms/ChakraFormikNumberInput";
 import ChakraFormikTextArea from "../../../Forms/ChakraFormikTextArea";
@@ -33,6 +35,7 @@ export default function CreateOrUpdateAuthorModal({
   currentAuthor,
   updateData,
 }: ICreateOrUpdateAuthorModalProps) {
+  const { getAccessTokenSilently } = useAuth0();
   const [isLoading, setIsLoading] = useState(false);
   const initialValues =
     type === "create"
@@ -41,14 +44,14 @@ export default function CreateOrUpdateAuthorModal({
           description: undefined,
           yearBorn: undefined,
           yearOfDeath: undefined,
-          imageURL: undefined,
+          image: undefined,
         }
       : {
           name: currentAuthor?.name,
           description: currentAuthor?.description,
           yearBorn: currentAuthor?.yearBorn,
           yearOfDeath: currentAuthor?.yearOfDeath,
-          imageURL: currentAuthor?.imageURL,
+          image: undefined,
         };
 
   const handleAuthorSubmit = async (
@@ -57,27 +60,42 @@ export default function CreateOrUpdateAuthorModal({
     requestType: "POST" | "PATCH"
   ) => {
     try {
+      let accessToken = await getAccessTokenSilently();
+
+      let formData = new FormData();
+
+      if (values.image) {
+        formData.append("image", values.image!);
+      }
+      delete values.image;
+
+      formData.append(
+        "author",
+        new Blob([JSON.stringify(values)], {
+          type: "application/json",
+        })
+      );
+
       const response = await fetch(
         requestType === "POST"
-          ? "http://localhost:3000/api/store/authors"
-          : `http://localhost:3000/api/store/authors/${currentAuthor?.id}`,
+          ? "http://localhost:8080/api/store/authors"
+          : `http://localhost:8080/api/store/authors/${currentAuthor?.id}`,
         {
           method: requestType,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(values),
+          headers: { authorization: `Bearer ${accessToken}` },
+          body: formData,
         }
       );
       if (response.ok || response.status === 204) {
         updateData();
         onClose();
-      } else if (response.status === 400) {
-        const data = await response.json();
-        actions.setErrors(data);
       } else {
         const data = await response.json();
-        actions.setStatus({ error: data.error });
+        actions.setErrors(
+          response.status === 400 ? data : { error: data.error }
+        );
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       actions.setStatus({ error: error.message });
     }
@@ -119,9 +137,6 @@ export default function CreateOrUpdateAuthorModal({
                     isRequired
                     fieldName="yearBorn"
                     label="Year of birth"
-                    min={99}
-                    max={99999}
-                    step={50}
                   />
 
                   <ChakraFormikNumberInput
@@ -132,9 +147,11 @@ export default function CreateOrUpdateAuthorModal({
                     step={1}
                   />
 
-                  <ChakraFormikFormField
-                    fieldName="imageURL"
-                    label="Image URL"
+                  <ChakraFormikFileUpload
+                    accept="image/*"
+                    fieldName="image"
+                    label="Author Image"
+                    externalFileUrl={currentAuthor?.imageURL}
                   />
                   {status && (
                     <Box textAlign="center" w="100%">

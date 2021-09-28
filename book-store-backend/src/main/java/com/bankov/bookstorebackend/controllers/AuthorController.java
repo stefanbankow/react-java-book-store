@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
@@ -36,15 +37,18 @@ public class AuthorController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('create:authors')")
-    public ResponseEntity<Author> createAuthor(@Valid @RequestBody Author newAuthor) {
-        return service.createAuthor(newAuthor);
+    public ResponseEntity<Author> createAuthor(@Valid @RequestPart Author author,
+                                               @RequestPart(required = false) MultipartFile image) {
+        return service.createAuthor(author, image);
     }
 
 
     @PatchMapping("/{id}")
     @PreAuthorize("hasAuthority('update:authors')")
-    public ResponseEntity<Author> updateAuthor(@PathVariable("id") Long id, @Valid @RequestBody Author updatedAuthor) {
-        return service.updateAuthor(id, updatedAuthor);
+    public ResponseEntity<Author> updateAuthor(@PathVariable("id") Long id,
+                                               @Valid @RequestPart Author author,
+                                               @RequestPart(required = false) MultipartFile image) {
+        return service.updateAuthor(id, author, image);
     }
 
     @DeleteMapping("/{id}")

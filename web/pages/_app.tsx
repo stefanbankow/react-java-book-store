@@ -3,16 +3,21 @@ import theme from "../components/theme/theme";
 import { ChakraProvider } from "@chakra-ui/react";
 import type { AppProps } from "next/app";
 import PageLayout from "../components/Layout/PageLayout";
-import { UserProvider } from "@auth0/nextjs-auth0";
 import Head from "next/head";
 import React from "react";
 import { Provider } from "react-redux";
 
 import store from "../redux/store";
+import { Auth0Provider } from "@auth0/auth0-react";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <UserProvider>
+    <Auth0Provider
+      domain={process.env.NEXT_PUBLIC_AUTH0_ISSUER_BASE_URL!}
+      clientId={process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID!}
+      redirectUri={process.env.NEXT_PUBLIC_AUTH0_BASE_URL}
+      audience={process.env.NEXT_PUBLIC_AUTH0_AUDIENCE}
+    >
       <Provider store={store}>
         <ChakraProvider theme={theme}>
           <PageLayout>
@@ -28,7 +33,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           </PageLayout>
         </ChakraProvider>
       </Provider>
-    </UserProvider>
+    </Auth0Provider>
   );
 }
 export default MyApp;

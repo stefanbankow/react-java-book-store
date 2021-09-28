@@ -30,11 +30,16 @@ import MyErrorMessage from "../components/UI/MyErrorMessage";
 import { PaginatedBooksResponseProps } from "../types/BookTypes";
 
 export async function getServerSideProps() {
-  const res = await fetch(
-    `http://localhost:3000/api/store/books?page=0&size=10&sortBy=id&asc=false`
-  );
-  const books: PaginatedBooksResponseProps = await res.json();
-  return { props: { books, status: res.status } };
+  try {
+    const res = await fetch(
+      `http://localhost:8080/api/store/books?page=0&size=10&sortBy=id&asc=false`
+    );
+    const books: PaginatedBooksResponseProps = await res.json();
+    return { props: { books, status: res.status } };
+  } catch (err) {
+    console.error(err);
+    return { props: { status: 500 } };
+  }
 }
 
 //Note: I would have loved to split each section in it's own separate component, but doing so messes up the link styling.
@@ -119,7 +124,7 @@ export default function Home({
           >
             <Waypoint onEnter={latestBooksState.onOpen} />
             <Box>
-              {books.totalElements ? (
+              {books?.totalElements ? (
                 <LatestBooksCarousel
                   books={books.content}
                   totalSlides={

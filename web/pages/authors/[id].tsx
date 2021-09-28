@@ -25,7 +25,10 @@ import { AuthorProps } from "../../types/AuthorTypes";
 import { fetcher } from "../../lib/fetcher";
 
 function useSingleBook(id?: string | string[] | number) {
-  const { data, error } = useSWR(() => `/api/store/authors/${id}`, fetcher);
+  const { data, error } = useSWR(
+    () => `http://localhost:8080/api/store/authors/${id}`,
+    fetcher
+  );
 
   return {
     data: data as AuthorProps,
